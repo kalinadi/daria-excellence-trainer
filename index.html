@@ -1,0 +1,1136 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="מסע החשיבה">
+<meta name="theme-color" content="#121845">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>מסע החשיבה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Varela+Round&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-size:14px}
+img{max-width:100%}
+[hidden]{display:none!important}
+/* Layout: one-screen game app — full-bleed world background, centered 860px column, bottom sheet for feedback */
+:root{
+  --bg1:#ffe9a8;--bg2:#ffc4d6;--onbg:#20223a;
+  --ink:#20223a;--muted:#5d607e;--card:#ffffff;--line:#e3e5f1;--chip:#f2f3fa;
+  --accent:#ff7a45;--accent-dk:#cc561f;--btn-ink:#20223a;
+  --good:#17894a;--good-bg:#d9f6e5;--bad:#cc3d3d;--bad-bg:#fde2e2;
+  --fd:'Fredoka','Varela Round',system-ui,sans-serif;
+  --fb:'Varela Round','Fredoka',system-ui,sans-serif;
+  color-scheme:light;
+}
+body[data-world="space"]{--bg1:#121845;--bg2:#3a2480;--onbg:#ffffff;--accent:#ffc12e;--accent-dk:#c58a00}
+body[data-world="animals"]{--bg1:#b5e69a;--bg2:#ffe49a;--onbg:#1c3610;--accent:#ff8a3d;--accent-dk:#c75d14}
+body[data-world="magic"]{--bg1:#4f2380;--bg2:#cf4d8a;--onbg:#ffffff;--accent:#7ee8d1;--accent-dk:#2ea68e}
+body[data-world="ocean"]{--bg1:#0d5f80;--bg2:#36c0bd;--onbg:#ffffff;--accent:#ffd84d;--accent-dk:#c49c0c}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg1);background-image:linear-gradient(165deg,var(--bg1),var(--bg2));color:var(--ink);font-family:var(--fb);direction:rtl;overflow:hidden;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+body[data-world="space"]{background-image:radial-gradient(2px 2px at 12% 18%,#fff8,transparent),radial-gradient(1.5px 1.5px at 72% 12%,#fff9,transparent),radial-gradient(2px 2px at 85% 60%,#fff7,transparent),radial-gradient(1.5px 1.5px at 30% 80%,#fff8,transparent),radial-gradient(1px 1px at 55% 40%,#fff9,transparent),linear-gradient(165deg,var(--bg1),var(--bg2))}
+body[data-world="ocean"]{background-image:radial-gradient(circle at 15% 85%,#ffffff22 0 30px,transparent 31px),radial-gradient(circle at 80% 70%,#ffffff1a 0 18px,transparent 19px),radial-gradient(circle at 60% 20%,#ffffff14 0 12px,transparent 13px),linear-gradient(180deg,var(--bg2),var(--bg1))}
+body[data-world="magic"]{background-image:radial-gradient(circle at 80% 10%,#ffffff26 0 60px,transparent 61px),linear-gradient(165deg,var(--bg1),var(--bg2))}
+body[data-world="animals"]{background-image:radial-gradient(ellipse at 50% 120%,#7cc45a 0 40%,transparent 41%),linear-gradient(180deg,var(--bg2),var(--bg1))}
+#app{position:relative;height:100%}
+.screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-block:16px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--fd);margin:0;text-wrap:balance}
+.onbg{color:var(--onbg)}
+.card{background:var(--card);border-radius:24px;padding:20px;box-shadow:0 8px 0 rgba(0,0,0,.08),0 14px 30px rgba(0,0,0,.12)}
+.btn{font-family:var(--fd);font-weight:600;font-size:1.35rem;padding:.75em 1.4em;border-radius:20px;border:0;background:var(--accent);color:var(--btn-ink);box-shadow:0 6px 0 var(--accent-dk);cursor:pointer;transition:transform .08s,box-shadow .08s;touch-action:manipulation}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--accent-dk)}
+.btn:focus-visible,.opt:focus-visible,.pickcard:focus-visible,.ibtn:focus-visible{outline:4px solid #2b59ff;outline-offset:3px}
+.btn.ghost{background:var(--chip);box-shadow:0 5px 0 #cfd2e4;color:var(--ink)}
+.btn.big{font-size:1.7rem;padding:.8em 1.6em;width:100%}
+.btn[disabled]{opacity:.5}
+.saybtn.on{background:var(--accent);box-shadow:0 4px 0 var(--accent-dk)}
+.lead{font-size:1.1rem;color:var(--muted);align-self:flex-start}
+.ibtn{border:0;background:rgba(255,255,255,.9);color:var(--ink);width:52px;height:52px;border-radius:16px;font-size:1.5rem;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.12);flex:none}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.muted{color:var(--muted)}
+/* top bar */
+.topbar{display:flex;align-items:center;gap:12px}
+.avatar{width:64px;height:64px;border-radius:20px;background:#fff;display:grid;place-items:center;font-size:2.4rem;box-shadow:0 5px 0 rgba(0,0,0,.12);position:relative;flex:none}
+.avatar .badge{position:absolute;bottom:-8px;left:-8px;font-size:1.1rem;background:var(--accent);border-radius:999px;padding:2px 7px;font-family:var(--fd);color:var(--btn-ink)}
+.pill{background:rgba(255,255,255,.92);border-radius:999px;padding:8px 14px;font-family:var(--fd);font-weight:600;font-size:1.2rem;display:flex;gap:6px;align-items:center;font-variant-numeric:tabular-nums;color:var(--ink)}
+.hello{font-family:var(--fd);font-size:1.5rem;font-weight:600}
+/* hero */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.hero .char{font-size:clamp(4.5rem,14vw,7rem);line-height:1;animation:bob 2.6s ease-in-out infinite}
+.bubble{background:var(--chip);border-radius:18px;padding:12px 16px;font-size:1.15rem;position:relative}
+.mission-title{font-size:1.8rem}
+.meta{display:flex;gap:10px;flex-wrap:wrap}
+.tag{background:var(--chip);border-radius:999px;padding:6px 12px;font-size:1rem}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-3deg)}}
+/* journey */
+.path{display:flex;gap:6px;align-items:center;overflow-x:auto;padding:6px 2px 10px}
+.node{flex:none;width:46px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.85rem;color:var(--muted)}
+.dot{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--fd);font-weight:700;border:3px solid var(--line);background:#fff;color:var(--muted);font-size:1.05rem}
+.node.done .dot{background:var(--good);border-color:var(--good);color:#fff}
+.node.today .dot{border-color:var(--accent-dk);background:var(--accent);color:var(--btn-ink);animation:pulse 1.6s infinite}
+.node.missed .dot{background:var(--chip)}
+.node.goal .dot{background:#ffd54a;border-color:#d9a400;font-size:1.3rem}
+.link{flex:none;width:14px;height:4px;border-radius:2px;background:var(--line)}
+@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(255,180,0,.25)}}
+/* skills */
+.skills{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sk{background:var(--chip);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.sk b{font-family:var(--fd);font-weight:600;font-size:1rem}
+.lv{display:flex;gap:4px}
+.lv i{flex:1;height:8px;border-radius:4px;background:#d9dbea}
+.lv i.on{background:var(--accent-dk)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:rgba(255,255,255,.95);border:0;border-radius:22px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--fd);font-size:1.2rem;font-weight:600;color:var(--ink);box-shadow:0 6px 0 rgba(0,0,0,.12);cursor:pointer}
+.tile .e{font-size:2.4rem}
+.tile small{font-family:var(--fb);font-weight:400;font-size:.9rem;color:var(--muted)}
+/* play */
+.playbar{display:flex;align-items:center;gap:12px}
+.prog{flex:1;height:18px;background:rgba(255,255,255,.35);border-radius:999px;overflow:hidden}
+.prog>i{display:block;height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .4s}
+.qcard{display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.qhead{display:flex;gap:10px;align-items:center}
+.sktag{background:var(--chip);border-radius:999px;padding:6px 12px;font-size:.95rem}
+.stars-lv{color:#e0a400;letter-spacing:1px}
+.prompt{font-family:var(--fd);font-weight:600;font-size:clamp(1.35rem,3.6vw,1.75rem);line-height:1.35}
+.stim{display:flex;flex-direction:column;align-items:center;gap:12px}
+.timer{position:absolute;top:0;right:0;left:0;height:6px;background:var(--chip)}
+.timer>i{display:block;height:100%;background:var(--accent-dk);width:100%;transform-origin:right}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.opt{background:#fff;border:3px solid var(--line);border-radius:20px;box-shadow:0 6px 0 #d3d6e8;min-height:76px;font-family:var(--fd);font-weight:600;font-size:clamp(1.25rem,3.4vw,1.6rem);color:var(--ink);padding:10px;cursor:pointer;display:grid;place-items:center;transition:transform .08s;touch-action:manipulation}
+.opt:active{transform:translateY(3px)}
+.opt.fig{aspect-ratio:1/1;min-height:0;padding:8%;max-height:190px}
+.opts.figs{grid-template-columns:repeat(4,minmax(0,1fr))}
+.opt.ok{background:var(--good-bg);border-color:var(--good);box-shadow:0 6px 0 var(--good)}
+.opt.no{background:var(--bad-bg);border-color:var(--bad);box-shadow:0 6px 0 var(--bad);animation:shake .35s}
+.opt.dim{opacity:.45}
+@keyframes shake{25%{transform:translateX(6px)}75%{transform:translateX(-6px)}}
+.fig{width:100%;height:100%;display:block}
+.cell{width:clamp(48px,13vw,116px);aspect-ratio:1/1;background:#fff;border:2px solid var(--line);border-radius:14px;padding:6px;display:grid;place-items:center;flex:none}
+.cell.q{background:var(--chip);border-style:dashed;font-family:var(--fd);font-size:2rem;color:var(--muted)}
+.seq{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.sep{color:var(--muted);font-size:1.2rem}
+.mx{display:grid;grid-template-columns:repeat(3,clamp(64px,19vw,108px));gap:8px}
+.mx .cell{width:100%}
+.anrow{display:flex;gap:10px;align-items:center;justify-content:center}
+.anbox{display:flex;flex-direction:column;gap:10px;align-items:center}
+.num{min-width:clamp(48px,12vw,78px);height:clamp(48px,12vw,78px);padding:0 8px;border-radius:14px;background:var(--chip);display:grid;place-items:center;font-family:var(--fd);font-weight:700;font-size:clamp(1.3rem,3.6vw,1.9rem);font-variant-numeric:tabular-nums}
+.num.q{background:#fff;border:3px dashed var(--accent-dk);color:var(--accent-dk)}
+.words{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;font-family:var(--fd);font-weight:600;font-size:clamp(1.3rem,3.6vw,1.8rem)}
+.word{background:var(--chip);border-radius:14px;padding:10px 16px}
+.word.q{background:#fff;border:3px dashed var(--accent-dk);color:var(--accent-dk);min-width:64px;text-align:center}
+.eq{direction:ltr;display:flex;flex-direction:column;gap:8px;align-items:center;font-family:var(--fd);font-weight:600;font-size:clamp(1.5rem,4.2vw,2.1rem)}
+.eq .em{font-size:1.15em}
+.passage{background:#fffbea;border:2px solid #f2e2a6;border-radius:18px;padding:16px 18px;font-size:clamp(1.15rem,3vw,1.35rem);line-height:1.7;max-width:62ch}
+.mirror{display:flex;gap:14px;align-items:center;justify-content:center}
+.mline{width:0;height:clamp(90px,24vw,150px);border-left:4px dashed var(--accent-dk)}
+.mbox{width:clamp(96px,26vw,160px)}
+/* feedback sheet */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;border-radius:26px 26px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.25);padding:18px max(16px,env(safe-area-inset-left,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px));animation:up .25s ease-out}
+.sheet .in{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.sheet.good{background:var(--good-bg)}
+.sheet.bad{background:#fff4ef}
+.sheet h3{font-size:1.6rem}
+.sheet.good h3{color:var(--good)}
+.sheet.bad h3{color:var(--bad)}
+.explain{font-size:1.2rem;line-height:1.6}
+@keyframes up{from{transform:translateY(100%)}}
+/* setup */
+.pickgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.pickcard{border:4px solid transparent;background:#fff;border-radius:22px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--fd);font-weight:600;font-size:1.3rem;color:var(--ink);cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.12)}
+.pickcard .e{font-size:3.2rem;line-height:1.1}
+.pickcard.sel{border-color:var(--accent-dk);background:#fff8e6}
+.field{display:flex;flex-direction:column;gap:6px;font-size:1.1rem}
+.field input,.field select{font:inherit;font-size:1.3rem;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:#fff;color:var(--ink);-webkit-user-select:text;user-select:text}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chipbtn{border:3px solid var(--line);background:#fff;border-radius:999px;padding:10px 18px;font-family:var(--fd);font-weight:600;font-size:1.15rem;color:var(--ink);cursor:pointer}
+.chipbtn.sel{border-color:var(--accent-dk);background:#fff3d6}
+.steps{display:flex;gap:6px;justify-content:center}
+.steps i{width:28px;height:8px;border-radius:4px;background:rgba(255,255,255,.4)}
+.steps i.on{background:var(--accent)}
+/* done */
+.chest{font-size:7rem;cursor:pointer;background:none;border:0;line-height:1;animation:wiggle 1.2s infinite}
+@keyframes wiggle{10%,30%{transform:rotate(-8deg)}20%,40%{transform:rotate(8deg)}50%{transform:none}}
+.prize{font-size:6rem;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.2)}}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;text-align:center}
+.stat{background:var(--chip);border-radius:16px;padding:12px 6px}
+.stat b{display:block;font-family:var(--fd);font-size:1.8rem;font-variant-numeric:tabular-nums}
+/* collection */
+.coll{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.slot{aspect-ratio:1/1;background:var(--chip);border-radius:18px;display:grid;place-items:center;font-size:clamp(2rem,8vw,3.4rem)}
+.slot.locked{color:#c5c8da;font-family:var(--fd);font-size:2rem}
+/* parent */
+table{border-collapse:collapse;width:100%;font-size:1rem}
+th,td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+th{font-weight:600;color:var(--muted);font-size:.9rem}
+.tbl{overflow-x:auto}
+.st{border-radius:999px;padding:3px 10px;font-size:.9rem;white-space:nowrap}
+.st.ahead{background:#dde8ff;color:#2846a8}
+.st.ok{background:var(--good-bg);color:var(--good)}
+.st.behind{background:#ffe9d6;color:#a3500d}
+.st.new{background:var(--chip);color:var(--muted)}
+.bars{display:flex;gap:6px;align-items:flex-end;height:90px}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.75rem;color:var(--muted);height:100%;justify-content:flex-end}
+.bars span{width:100%;background:var(--accent);border-radius:6px 6px 2px 2px;min-height:2px}
+.note{background:#f6f7fc;border-radius:16px;padding:14px 16px;line-height:1.6}
+.toast{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#fff;border-radius:999px;padding:10px 20px;font-family:var(--fd);font-weight:600;font-size:1.3rem;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:30;animation:pop .35s}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:40}
+@media (max-width:560px){
+  .opts.figs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .opt.fig{max-height:150px}
+  .hero{grid-template-columns:1fr;text-align:center;justify-items:center}
+  .card{padding:16px;border-radius:20px}
+  .avatar{width:54px;height:54px;font-size:2rem}
+  .coll{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <section class="screen" id="s-login" hidden></section>
+  <section class="screen" id="s-setup" hidden></section>
+  <section class="screen" id="s-home" hidden></section>
+  <section class="screen" id="s-play" hidden></section>
+  <section class="screen" id="s-done" hidden></section>
+  <section class="screen" id="s-coll" hidden></section>
+  <section class="screen" id="s-gate" hidden></section>
+  <section class="screen" id="s-parent" hidden></section>
+</div>
+<div id="sheet-host"></div>
+<canvas id="fx"></canvas>
+
+<script src="firebase-config.js"></script>
+<script>
+/* ============ utilities ============ */
+const $=s=>document.querySelector(s);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const sample=(a,n)=>shuffle(a).slice(0,n);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const dkey=(d=new Date())=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseKey=k=>{const[y,m,d]=k.split('-').map(Number);return Date.UTC(y,m-1,d)};
+const daysBetween=(a,b)=>Math.round((parseKey(b)-parseKey(a))/864e5);
+const addDays=(k,n)=>{const t=new Date(parseKey(k)+n*864e5);return `${t.getUTCFullYear()}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())}`};
+const DOW=['א','ב','ג','ד','ה','ו','ש'];
+const dowOf=k=>DOW[new Date(parseKey(k)).getUTCDay()];
+
+/* ============ state ============ */
+const LS='mesa-hachshiva-v1';
+let state=null;
+const SKILLS={
+  analogy:{name:'אנלוגיות מילים',stage:'A',e:'🔗'},
+  oddword:{name:'מילה לא שייכת',stage:'A',e:'🧺'},
+  reading:{name:'הבנת הנקרא',stage:'A',e:'📖'},
+  logic:{name:'חשיבה לוגית',stage:'A',e:'🧩'},
+  wordprob:{name:'בעיות מילוליות',stage:'A',e:'🧮'},
+  symbols:{name:'משוואות וסמלים',stage:'A',e:'🍎'},
+  series:{name:'סדרות מספרים',stage:'AB',e:'🔢'},
+  shapeseries:{name:'סדרות צורות',stage:'B',e:'🔷'},
+  matrix:{name:'מטריצות',stage:'B',e:'▦'},
+  shapeanalogy:{name:'אנלוגיות צורות',stage:'B',e:'🔺'},
+  oddshape:{name:'צורה יוצאת דופן',stage:'B',e:'⭐'},
+  mirror:{name:'תמונת מראה',stage:'B',e:'🪞'}
+};
+const WORLDS={
+  space:{name:'מסע בחלל',e:'🚀',chars:['👩‍🚀','🧑‍🚀','👽','🤖'],items:['🪐','🌙','☄️','🌍','🛰️','🌟','🔭','👾','🌞','🌠','🛸','🌌'],place:'כוכב'},
+  animals:{name:'ספארי בטבע',e:'🦁',chars:['🐶','🐱','🦊','🐼'],items:['🦁','🐘','🦒','🦓','🐵','🐨','🐯','🦔','🦉','🦩','🐢','🦋'],place:'שמורה'},
+  magic:{name:'ממלכת הקסם',e:'🏰',chars:['🧙‍♀️','🧙‍♂️','🧚','🐉'],items:['🔮','🪄','📜','💎','🍄','🏰','🌈','🧪','🦄','👑','🗝️','✨'],place:'טירה'},
+  ocean:{name:'מתחת לים',e:'🐠',chars:['🐬','🐙','🐢','🧜‍♀️'],items:['🐠','🐡','🦀','🐚','🐳','🦑','🪸','🦈','🐋','🐙','🏝️','⚓'],place:'אי'}
+};
+function newState(){
+  const skills={};Object.keys(SKILLS).forEach(k=>skills[k]={lvl:1.5,n:0,c:0,t:0,h:[]});
+  return {v:2,profile:{name:'',gender:'',world:'',char:''},settings:{testDate:'',minutes:15,focus:'both',autoRead:false,sound:true,voice:'',rate:.9},
+    startDate:dkey(),skills,stars:0,collection:[],days:{},streak:{last:'',count:0},avgSec:42,seen:{},retry:{},sessions:[],t:0};
+}
+function migrate(s){
+  const base=newState();
+  if(!s||typeof s!=='object')return base;
+  s.profile=Object.assign(base.profile,s.profile||{});
+  s.settings=Object.assign(base.settings,s.settings||{});
+  s.skills=Object.assign(base.skills,s.skills||{});
+  ['days','streak','seen','retry'].forEach(k=>{if(!s[k])s[k]=base[k]});
+  if(!Array.isArray(s.collection))s.collection=[];
+  if(!Array.isArray(s.sessions))s.sessions=[];
+  if(!s.startDate)s.startDate=dkey();
+  if(!s.avgSec)s.avgSec=42;
+  if(typeof s.stars!=='number')s.stars=0;
+  if(!s.v||s.v<2){s.settings.autoRead=false;s.v=2}
+  return s;
+}
+const lsKey=()=>cloudUser?LS+':'+cloudUser.uid:LS;
+function loadLocal(key){try{const r=localStorage.getItem(key||lsKey());return r?JSON.parse(r):null}catch(e){return null}}
+function saveLocal(){try{localStorage.setItem(lsKey(),JSON.stringify(state))}catch(e){}}
+const LM='mesa-local-mode';
+function localMode(){try{return localStorage.getItem(LM)==='1'}catch(e){return false}}
+function setLocalMode(on){try{on?localStorage.setItem(LM,'1'):localStorage.removeItem(LM)}catch(e){}}
+function save(){state.t=Date.now();saveLocal();syncRemote()}
+
+/* cloud sync: Firebase (Google sign-in + Firestore), loaded by the module script at the end */
+const CLOUD=!!(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.apiKey);
+let cloud=null,cloudUser=null,syncT=null,cloudFailed=false;
+function syncRemote(){
+  if(!cloud||!cloudUser||!state)return;
+  clearTimeout(syncT);
+  const uid=cloudUser.uid;
+  syncT=setTimeout(()=>{cloud.save(uid,{json:JSON.stringify(state),t:state.t||Date.now()}).catch(()=>{})},1200);
+}
+window.__cloudReady=function(api){
+  cloud=api;
+  api.onUser(async u=>{
+    if(u){
+      cloudUser=u;setLocalMode(false);
+      let local=loadLocal();
+      if(!local||!(local.profile&&local.profile.name)){const anon=loadLocal(LS);if(anon&&anon.profile&&anon.profile.name)local=anon}
+      let remote=null;try{remote=await api.load(u.uid)}catch(e){}
+      state=(remote&&remote.json&&(remote.t||0)>((local&&local.t)||0))?migrate(JSON.parse(remote.json)):migrate(local);
+      saveLocal();
+      if(!remote||(remote.t||0)<(state.t||0)){state.t=state.t||Date.now();syncRemote()}
+      boot();
+    }else{
+      cloudUser=null;
+      if(!localMode())renderLogin(false);
+    }
+  });
+};
+window.__cloudFail=function(){cloudFailed=true;if(!localMode()&&current==='login')renderLogin(true)};
+function renderLogin(offline){
+  document.body.dataset.world='';
+  $('#s-login').innerHTML=`<div class="wrap" style="min-height:100%;justify-content:center">
+    <div style="text-align:center;font-size:5rem;line-height:1">🧠</div>
+    <h1 style="text-align:center;font-size:2.5rem">מסע החשיבה</h1>
+    <p style="text-align:center;font-size:1.2rem;margin:0;line-height:1.6">משחק חשיבה לילדי כיתה ב'. מתחברים כדי שההתקדמות, הכוכבים וההגדרות יישמרו בכל מכשיר.</p>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <button class="btn big" id="g-in" ${offline||!cloud?'disabled':''}>התחברות עם Google</button>
+      ${offline?'<div class="muted">אין כרגע חיבור לשירות ההתחברות. אפשר לשחק בלי חשבון ולהתחבר אחר כך מאזור ההורים.</div>':''}
+      <button class="btn ghost" id="g-local">לשחק בלי חשבון</button>
+      <div class="muted" style="font-size:.95rem">בלי חשבון, ההתקדמות נשמרת רק במכשיר הזה.</div>
+    </div></div>`;
+  show('login');
+  const gi=$('#g-in');
+  gi.onclick=async()=>{if(!cloud)return;gi.disabled=true;try{await cloud.signIn()}catch(e){toast('ההתחברות לא הצליחה, נסו שוב');gi.disabled=false}};
+  $('#g-local').onclick=()=>{setLocalMode(true);cloudUser=null;state=migrate(loadLocal(LS));boot()};
+}
+function renderLoading(){
+  $('#s-login').innerHTML=`<div class="wrap" style="min-height:100%;justify-content:center;align-items:center"><div style="font-size:4rem;animation:bob 1.2s infinite">🧠</div><div style="font-family:var(--fd);font-size:1.4rem">טוען...</div></div>`;
+  show('login');
+}
+
+const G=()=>state.profile.gender||'f';
+const g=(m,f)=>G()==='m'?m:f;
+
+/* ============ sound + speech + fx ============ */
+let ac=null;
+function tone(fs,dur=.13,type='sine',gap=.09,vol=.16){
+  if(!state||!state.settings.sound)return;
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();
+    fs.forEach((f,i)=>{const o=ac.createOscillator(),gn=ac.createGain();o.type=type;o.frequency.value=f;const t=ac.currentTime+i*gap;
+      gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(vol,t+.02);gn.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      o.connect(gn).connect(ac.destination);o.start(t);o.stop(t+dur+.05)})}catch(e){}
+}
+const sfx={ok:()=>tone([660,880,1175]),bad:()=>tone([294,220],.2,'triangle',.13,.12),tap:()=>tone([560],.05,'sine',0,.07),
+  win:()=>tone([523,659,784,1046,1318],.2,'triangle',.11),combo:()=>tone([880,1175,1568],.1,'square',.07,.06)};
+let heVoice=null,heVoices=[],speaking=false,speakId=0;
+function voiceScore(v){let x=0;if(/enhanced|premium|natural|neural|online|siri|משופר/i.test(v.name))x+=6;if(/google|microsoft/i.test(v.name))x+=3;if(!v.localService)x+=1;return x}
+function loadVoices(){try{heVoices=speechSynthesis.getVoices().filter(v=>/^(he|iw)/i.test(v.lang));const pref=state&&state.settings.voice;
+  heVoice=heVoices.find(v=>v.name===pref)||heVoices.slice().sort((a,b)=>voiceScore(b)-voiceScore(a))[0]||null}catch(e){}}
+try{loadVoices();speechSynthesis.onvoiceschanged=loadVoices}catch(e){}
+function setSpeakUI(on){speaking=on;document.querySelectorAll('.saybtn').forEach(b=>{b.textContent=on?'⏹':'🔊';b.setAttribute('aria-label',on?'עצירת ההקראה':'הקראה');b.classList.toggle('on',on)})}
+function speechText(t){return String(t).replace(/×/g,' כפול ').replace(/−/g,' פחות ').replace(/\+/g,' ועוד ').replace(/=/g,' שווה ').replace(/←/g,', ').replace(/["'״׳()]/g,'').replace(/\s+/g,' ').trim()}
+function speak(text){
+  try{if(!('speechSynthesis' in window)||!text)return;speechSynthesis.cancel();if(!heVoice)loadVoices();
+    const id=++speakId;const parts=speechText(text).split(/(?<=[.?!:])\s+/).filter(Boolean);
+    setSpeakUI(true);
+    parts.forEach((pt,i)=>{const u=new SpeechSynthesisUtterance(pt);u.lang='he-IL';if(heVoice)u.voice=heVoice;u.rate=state?.settings.rate||.9;
+      if(i===parts.length-1){u.onend=u.onerror=()=>{if(id===speakId)setSpeakUI(false)}}speechSynthesis.speak(u)});
+  }catch(e){setSpeakUI(false)}
+}
+function stopSpeak(){speakId++;try{speechSynthesis.cancel()}catch(e){}setSpeakUI(false)}
+function toggleSpeak(text){if(speaking)stopSpeak();else speak(text)}
+const fx=$('#fx');const fctx=fx.getContext('2d');let parts=[],fxOn=false;
+function confetti(n=70){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  fx.width=innerWidth*devicePixelRatio;fx.height=innerHeight*devicePixelRatio;
+  const cs=['#ff5d5d','#ffc12e','#36c26b','#3b82f6','#a855f7','#ff8ad1'];
+  for(let i=0;i<n;i++)parts.push({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,s:6+Math.random()*7,c:pick(cs),r:Math.random()*6,life:90+Math.random()*40});
+  if(!fxOn){fxOn=true;requestAnimationFrame(stepFx)}
+}
+function stepFx(){
+  const d=devicePixelRatio;fctx.clearRect(0,0,fx.width,fx.height);
+  parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.45;p.vx*=.99;p.r+=.2;p.life--;fctx.save();fctx.translate(p.x*d,p.y*d);fctx.rotate(p.r);fctx.fillStyle=p.c;fctx.fillRect(-p.s*d/2,-p.s*d/4,p.s*d,p.s*d/2);fctx.restore()});
+  parts=parts.filter(p=>p.life>0&&p.y<innerHeight+40);
+  if(parts.length)requestAnimationFrame(stepFx);else{fxOn=false;fctx.clearRect(0,0,fx.width,fx.height)}
+}
+function toast(t){const el=document.createElement('div');el.className='toast';el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),1500)}
+
+/* ============ figures (SVG) ============ */
+const SHAPES=['circle','square','triangle','star','diamond','hexagon','heart'];
+const COLORS=['red','blue','green','orange','purple'];
+const COL={red:'#e53935',blue:'#2f6fe4',green:'#1f9d4c',orange:'#f57c1f',purple:'#8e3fd6'};
+const COLN={red:'אדום',blue:'כחול',green:'ירוק',orange:'כתום',purple:'סגול'};
+const SHN={circle:'עיגול',square:'ריבוע',triangle:'משולש',star:'כוכב',diamond:'מעוין',hexagon:'משושה',heart:'לב',arrow:'חץ'};
+const F=o=>Object.assign({shape:'circle',color:'red',count:1,size:2,rot:0,fill:true},o);
+const fkey=f=>[f.shape,f.color,f.count,f.size,((f.rot%360)+360)%360,f.fill?1:0].join('|');
+function polyPts(cx,cy,r,n,start){let p=[];for(let i=0;i<n;i++){const a=(start+i*360/n)*Math.PI/180;p.push(`${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`)}return p.join(' ')}
+function shapeEl(shape,cx,cy,r,c,fill,rot){
+  const sw=fill?2:Math.max(3,r*.17);const st=`fill="${fill?c:'#ffffff'}" stroke="${c}" stroke-width="${sw.toFixed(1)}" stroke-linejoin="round"`;
+  const p=(x,y)=>`${(cx+x*r).toFixed(1)},${(cy+y*r).toFixed(1)}`;let el='';
+  switch(shape){
+    case 'circle':el=`<circle cx="${cx}" cy="${cy}" r="${(r*.9).toFixed(1)}" ${st}/>`;break;
+    case 'square':{const s=r*1.6;el=`<rect x="${(cx-s/2).toFixed(1)}" y="${(cy-s/2).toFixed(1)}" width="${s.toFixed(1)}" height="${s.toFixed(1)}" rx="${(r*.12).toFixed(1)}" ${st}/>`;break}
+    case 'triangle':el=`<polygon points="${polyPts(cx,cy+r*.15,r*1.05,3,-90)}" ${st}/>`;break;
+    case 'diamond':el=`<polygon points="${p(0,-1)} ${p(.72,0)} ${p(0,1)} ${p(-.72,0)}" ${st}/>`;break;
+    case 'hexagon':el=`<polygon points="${polyPts(cx,cy,r*.95,6,0)}" ${st}/>`;break;
+    case 'star':{let pts=[];for(let i=0;i<10;i++){const a=(-90+i*36)*Math.PI/180,rr=i%2?r*.45:r;pts.push(`${(cx+rr*Math.cos(a)).toFixed(1)},${(cy+rr*Math.sin(a)).toFixed(1)}`)}el=`<polygon points="${pts.join(' ')}" ${st}/>`;break}
+    case 'heart':el=`<path d="M${p(0,.85)} C${p(-1.25,0)} ${p(-.78,-.95)} ${p(0,-.38)} C${p(.78,-.95)} ${p(1.25,0)} ${p(0,.85)}Z" ${st}/>`;break;
+    case 'arrow':el=`<polygon points="${p(0,-1)} ${p(.72,-.18)} ${p(.28,-.18)} ${p(.28,.95)} ${p(-.28,.95)} ${p(-.28,-.18)} ${p(-.72,-.18)}" ${st}/>`;break;
+  }
+  return rot?`<g transform="rotate(${rot} ${cx} ${cy})">${el}</g>`:el;
+}
+function figSVG(f){
+  const n=clamp(f.count||1,1,5),sm=[.6,.8,1][(f.size||2)-1];
+  const P={1:[[50,50,40]],2:[[28,50,20]],3:[[50,27,18],[27,71,18],[73,71,18]],4:[[28,28,18],[72,28,18],[28,72,18],[72,72,18]],5:[[25,25,15],[75,25,15],[50,50,15],[25,75,15],[75,75,15]]};
+  const pos=n===2?[[28,50,20],[72,50,20]]:P[n];
+  return `<svg viewBox="0 0 100 100" class="fig" aria-hidden="true">${pos.map(([x,y,r])=>shapeEl(f.shape,x,y,r*sm,COL[f.color],f.fill!==false,f.rot||0)).join('')}</svg>`;
+}
+const fname=f=>`${SHN[f.shape]} ${COLN[f.color]}`;
+function mutate(f,attr,pools){
+  const o=Object.assign({},f);
+  const pool={shape:pools.shape||SHAPES,color:pools.color||COLORS,count:[1,2,3,4,5],size:[1,2,3],rot:[0,45,90,135,180,225,270,315],fill:[true,false]}[attr];
+  const opts=pool.filter(v=>attr==='rot'?(((v-f.rot)%360+360)%360)!==0:v!==f[attr]);
+  o[attr]=pick(opts);return o;
+}
+
+/* ============ question builders ============ */
+function finishText(q,correct,dis){
+  const seen=new Set([String(correct)]);const list=[String(correct)];
+  for(const d of dis){const s=String(d);if(!seen.has(s)){seen.add(s);list.push(s)}if(list.length>=4)break}
+  const opts=shuffle(list);q.optType='text';q.opts=opts.map(o=>({html:esc(o),text:o}));q.ans=opts.indexOf(String(correct));return q;
+}
+function finishFig(q,correct,dis,pools={}){
+  const seen=new Set([fkey(correct)]);const list=[correct];
+  for(const d of dis){if(!d||d.count>5)continue;const k=fkey(d);if(!seen.has(k)){seen.add(k);list.push(d)}if(list.length>=4)break}
+  let guard=0;while(list.length<4&&guard++<60){const d=mutate(correct,pick(['shape','color','size','fill']),pools);const k=fkey(d);if(!seen.has(k)){seen.add(k);list.push(d)}}
+  const opts=shuffle(list);q.optType='fig';q.opts=opts.map(f=>({html:figSVG(f),text:''}));q.ans=opts.findIndex(f=>fkey(f)===fkey(correct));return q;
+}
+function numDis(ans,cands){
+  let out=cands.filter(x=>Number.isInteger(x)&&x>=0&&x!==ans);
+  [1,-1,2,-2,10,-10,3].forEach(k=>out.push(ans+k));
+  return [...new Set(out.filter(x=>x>=0&&x!==ans))];
+}
+function pickBank(skill,bank,lvIdx,L){
+  state.seen[skill]=state.seen[skill]||[];state.retry[skill]=state.retry[skill]||[];
+  const r=state.retry[skill];
+  if(r.length&&Math.random()<.35){const id=r.shift();if(bank[id])return id}
+  let c=bank.map((b,i)=>i).filter(i=>!state.seen[skill].includes(i));
+  if(c.length<3){state.seen[skill]=[];c=bank.map((b,i)=>i)}
+  const sc=c.map(i=>[i,Math.abs(bank[i][lvIdx]-L)+Math.random()*1.2]).sort((a,b)=>a[1]-b[1]);
+  const id=sc[0][0];state.seen[skill].push(id);return id;
+}
+
+/* --- word banks --- */
+const ANALOGY=[
+ ['חתול','מיאו','כלב','הב','מו|ציוץ|קרקור',1,'חתול עושה מיאו, וכלב עושה הב.'],
+ ['ציפור','עפה','דג','שוחה','הולך|קופץ|רץ',1,'ציפור עפה באוויר, ודג שוחה במים.'],
+ ['יום','שמש','לילה','ירח','ענן|גשם|בוקר',1,'ביום רואים את השמש, ובלילה את הירח.'],
+ ['גדול','קטן','גבוה','נמוך','ארוך|רחב|חזק',1,'גדול הפוך מקטן, וגבוה הפוך מנמוך.'],
+ ['עט','כותבים','מספריים','גוזרים','צובעים|מוחקים|מודדים',1,'בעט כותבים, ובמספריים גוזרים.'],
+ ['פרה','חלב','תרנגולת','ביצה','נוצה|צמר|דבש',1,'מהפרה מקבלים חלב, ומהתרנגולת ביצים.'],
+ ['יד','כפפה','רגל','גרב','כובע|צעיף|חגורה',1,'על היד שמים כפפה, ועל הרגל גרב.'],
+ ['חם','קר','קיץ','חורף','חופש|שמש|ים',2,'חם הפוך מקר, וקיץ הפוך מחורף.'],
+ ['רופא','בית חולים','מורה','בית ספר','ספר|תלמיד|לוח',2,'רופא עובד בבית חולים, ומורה עובד בבית ספר.'],
+ ['צייר','ציור','סופר','ספר','עט|מילה|ספרייה',2,'צייר יוצר ציור, וסופר כותב ספר.'],
+ ['עין','רואים','אוזן','שומעים','מדברים|מריחים|טועמים',2,'בעין רואים, ובאוזן שומעים.'],
+ ['גור','כלב','אפרוח','תרנגולת','ביצה|קן|נוצה',2,'גור הוא תינוק של כלב, ואפרוח הוא תינוק של תרנגולת.'],
+ ['ראש','כובע','רגל','נעל','כפפה|צעיף|חגורה',2,'על הראש שמים כובע, ועל הרגל נעל.'],
+ ['מים','צמא','אוכל','רעב','צלחת|מטבח|טעים',2,'כשצמאים שותים מים, וכשרעבים אוכלים אוכל.'],
+ ['מהר','לאט','רועש','שקט','חזק|מהיר|שמח',3,'מהר הפוך מלאט, ורועש הפוך משקט.'],
+ ['דבורה','כוורת','ציפור','קן','עץ|שמיים|נוצה',3,'הדבורה גרה בכוורת, והציפור גרה בקן.'],
+ ['שעון','שעה','מדחום','חום','מים|רופא|תרופה',3,'שעון מודד שעה, ומדחום מודד חום.'],
+ ['נהג','מכונית','טייס','מטוס','שדה תעופה|כנפיים|שמיים',3,'נהג נוהג במכונית, וטייס מטיס מטוס.'],
+ ['שלג','לבן','דשא','ירוק','רך|גינה|גבוה',3,'השלג לבן, והדשא ירוק.'],
+ ['אצבע','יד','בוהן','רגל','ציפורן|נעל|ברך',3,'אצבע היא חלק מהיד, ובוהן היא חלק מהרגל.'],
+ ['ספר','קוראים','שיר','שרים','רוקדים|מציירים|בונים',3,'ספר קוראים, ושיר שרים.'],
+ ['מלח','מלוח','סוכר','מתוק','חמוץ|מר|חריף',3,'מלח טעמו מלוח, וסוכר טעמו מתוק.'],
+ ['עייף','לישון','רעב','לאכול','לשתות|לרוץ|לשחק',4,'כשעייפים הולכים לישון, וכשרעבים אוכלים.'],
+ ['טיפה','ים','עץ','יער','עלה|שורש|ענף',4,'הרבה טיפות יחד הן ים, והרבה עצים יחד הם יער.'],
+ ['קמח','עוגה','ענבים','מיץ ענבים','כרם|סל|אשכול',4,'מקמח מכינים עוגה, ומענבים מכינים מיץ ענבים.'],
+ ['לפני','אחרי','מעל','מתחת','ליד|בתוך|רחוק',4,'לפני הפוך מאחרי, ומעל הפוך ממתחת.'],
+ ['פסנתר','קלידים','גיטרה','מיתרים','תופים|שיר|חליל',4,'בפסנתר מנגנים על קלידים, ובגיטרה על מיתרים.'],
+ ['סוס','דוהר','נחש','זוחל','קופץ|עף|שוחה',4,'סוס דוהר על רגליו, ונחש זוחל על הקרקע.'],
+ ['רכבת','מסילה','מכונית','כביש','גלגל|נהג|דלק',4,'רכבת נוסעת על מסילה, ומכונית נוסעת על כביש.'],
+ ['שעה','דקה','דקה','שנייה','יום|שעון|רגע',5,'שעה מחולקת לדקות, ודקה מחולקת לשניות.'],
+ ['צמא','מים','חושך','אור','לילה|שינה|צל',5,'מים עוזרים כשצמאים, ואור עוזר כשחושך.'],
+ ['אגם','ים','גבעה','הר','עמק|מדבר|חול',5,'אגם קטן מים, וגבעה קטנה מהר.'],
+ ['אבן','כבדה','נוצה','קלה','חמה|רטובה|ירוקה',5,'אבן היא כבדה, ונוצה היא קלה.']
+];
+const ODDW=[
+ ['כלב|חתול|פרה','שולחן','כלב, חתול ופרה הם בעלי חיים. שולחן הוא רהיט.',1],
+ ['תפוח|בננה|ענבים','גזר','תפוח, בננה וענבים הם פירות. גזר הוא ירק.',1],
+ ['אדום|כחול|ירוק','גדול','אדום, כחול וירוק הם צבעים. גדול הוא לא צבע.',1],
+ ['מכונית|אוטובוס|משאית','כיסא','מכונית, אוטובוס ומשאית הם כלי רכב.',1],
+ ['חולצה|מכנסיים|שמלה','כף','חולצה, מכנסיים ושמלה הם בגדים.',1],
+ ['אחת|שתיים|שלוש','שמש','אחת, שתיים ושלוש הם מספרים.',1],
+ ['מזלג|כף|סכין','צלחת','מזלג, כף וסכין מחזיקים ביד כדי לאכול. צלחת היא כלי שמגישים בו.',2],
+ ['חורף|אביב|סתיו','שבת','חורף, אביב וסתיו הם עונות. שבת היא יום בשבוע.',2],
+ ['פטיש|מסור|מברג','עיפרון','פטיש, מסור ומברג הם כלי עבודה.',2],
+ ['עין|אף|אוזן','נעל','עין, אף ואוזן הם חלקים של הגוף.',2],
+ ['עגבנייה|מלפפון|חסה','ענבים','עגבנייה, מלפפון וחסה הם ירקות. ענבים הם פרי.',2],
+ ['ורד|חמנייה|כלנית','אלון','ורד, חמנייה וכלנית הם פרחים. אלון הוא עץ.',2],
+ ['ינואר|מרץ|יוני','ראשון','ינואר, מרץ ויוני הם חודשים. ראשון הוא יום בשבוע.',3],
+ ['שמח|עליז|מאושר','עצוב','שמח, עליז ומאושר הן מילים דומות. עצוב הוא ההפך שלהן.',3],
+ ['גדול|ענק|עצום','זעיר','גדול, ענק ועצום הן מילים דומות. זעיר פירושו קטן מאוד.',3],
+ ['מורה|רופא|נהג','ילד','מורה, רופא ונהג הם מקצועות.',3],
+ ['ירושלים|חיפה|אילת','ישראל','ירושלים, חיפה ואילת הן ערים. ישראל היא מדינה.',3],
+ ['ארבע|שש|שמונה','שבע','ארבע, שש ושמונה הם מספרים זוגיים. שבע הוא אי-זוגי.',3],
+ ['שולחן|כיסא|מיטה','מקרר','שולחן, כיסא ומיטה הם רהיטים. מקרר הוא מכשיר חשמלי.',3],
+ ['גלידה|קרח|שלג','אש','גלידה, קרח ושלג הם קרים. אש היא חמה.',3],
+ ['מטוס|ציפור|פרפר','נחש','מטוס, ציפור ופרפר יכולים לעוף. נחש לא עף.',3],
+ ['לרוץ|לקפוץ|ללכת','לישון','לרוץ, לקפוץ וללכת הם תנועה. כשישנים לא זזים.',3],
+ ['לימון|בננה|תירס','חציל','לימון, בננה ותירס הם צהובים. חציל הוא סגול.',4],
+ ['שלג|חלב|ענן','פחם','שלג, חלב וענן הם לבנים. פחם הוא שחור.',4],
+ ['ריבוע|משולש|עיגול','קובייה','ריבוע, משולש ועיגול הם צורות שטוחות. קובייה היא גוף.',4],
+ ['כבשה|עז|פרה','אריה','כבשה, עז ופרה הן חיות משק שאוכלות עשב. אריה הוא טורף.',4],
+ ['שלוש|חמש|תשע','ארבע','שלוש, חמש ותשע הם אי-זוגיים. ארבע הוא זוגי.',4],
+ ['בוקר|צהריים|ערב','שבוע','בוקר, צהריים וערב הם חלקים של יום אחד. שבוע ארוך הרבה יותר.',4],
+ ['נשר|יונה|דרור','עטלף','נשר, יונה ודרור הם ציפורים. עטלף עף, אבל הוא יונק.',5],
+ ['כריש|דג זהב|סלמון','דולפין','כריש, דג זהב וסלמון הם דגים. דולפין חי בים, אבל הוא יונק.',5],
+ ['דבורה|נמלה|זבוב','עכביש','לדבורה, לנמלה ולזבוב יש 6 רגליים, הם חרקים. לעכביש יש 8 רגליים.',5],
+ ['עשר|עשרים|שלושים','שלושים וחמש','עשר, עשרים ושלושים הם עשרות שלמות.',5]
+];
+const READING=[
+ ['אבא כתב רשימת קניות: חלב, לחם, ביצים ותפוחים. כשחזר מהסופר, הוא ראה שהביצים חסרות בשקית.','מה אבא שכח לקנות?','ביצים','חלב|לחם|תפוחים',1,'בטקסט כתוב שהביצים חסרות בשקית.'],
+ ['ללֵיה יש כלב בשם בובי. כשליה חוזרת מבית הספר, בובי מכשכש בזנב וקופץ עליה.','מה בובי מרגיש כשליה חוזרת?','שמחה','פחד|כעס|עצב',1,'כלב מכשכש בזנב וקופץ כשהוא שמח.'],
+ ['יואב קם בבוקר והסתכל מהחלון. הרחוב היה רטוב, והאנשים הלכו עם מטריות.','מה כנראה קרה בבוקר?','ירד גשם','היה חם מאוד|היה חג|הרחוב נסגר',2,'רחוב רטוב ומטריות הם סימנים לגשם.'],
+ ['נועה שמה עוגה בתנור. אחרי זמן קצר כל הבית הריח טוב.','למה הבית הריח טוב?','בגלל העוגה שבתנור','בגלל פרחים|כי ניקו את הבית|כי פתחו חלון',2,'הריח הגיע אחרי שהעוגה נכנסה לתנור.'],
+ ['ענבל לבשה מעיל, כובע צמר וכפפות לפני שיצאה מהבית.','איך היה מזג האוויר?','קר','חם מאוד|שמשי וחם|חם ולח',2,'מעיל, כובע צמר וכפפות לובשים כשקר.'],
+ ['דני רצה לקנות גלידה. כשהגיע לקופה, הוא גילה שהשאיר את הארנק בבית.','למה דני לא קנה גלידה?','לא היה לו כסף איתו','הגלידה נגמרה|הוא לא אוהב גלידה|החנות הייתה סגורה',3,'הארנק נשאר בבית, ולכן לא היה לו כסף.'],
+ ['בגינה של סבתא גדלים עגבניות, מלפפונים וגזר. בכל שבת היא קוטפת ומכינה סלט.','מה סבתא מגדלת בגינה?','ירקות','פרחים|פירות|עצים',3,'עגבניות, מלפפונים וגזר הם ירקות.'],
+ ['השעון הראה שמונה בערב. אמא אמרה לתמר: "הגיע הזמן לצחצח שיניים וללבוש פיג\'מה".','מה תמר תעשה בקרוב?','תלך לישון','תלך לבית הספר|תאכל ארוחת בוקר|תצא לטיול',3,'בערב, אחרי צחצוח שיניים ופיג\'מה, הולכים לישון.'],
+ ['מיכל נכנסה לכיתה. המורה חייכה ואמרה: "בוקר טוב! היום הגעת לפני כולם".','מה אפשר להבין מהסיפור?','מיכל הגיעה ראשונה','מיכל איחרה|מיכל לא הגיעה|המורה כעסה',4,'"לפני כולם" פירושו שמיכל הגיעה ראשונה.'],
+ ['רון וגיל שיחקו כדורגל בחצר. פתאום נשמע רעש של זכוכית נשברת, והשניים הסתכלו בבהלה על החלון של השכנים.','מה כנראה קרה?','הכדור שבר את החלון','השכנים צעקו|התחיל גשם|נשברה כוס במטבח',4,'הם שיחקו בכדור, שמעו זכוכית נשברת והסתכלו על החלון.'],
+ ['הספרייה פתוחה בימים ראשון עד חמישי. אלה רצתה להחזיר ספר ביום שבת.','האם אלה תוכל להחזיר את הספר בשבת?','לא, כי הספרייה סגורה','כן, אפשר בכל יום|כן, אבל רק בבוקר|לא, כי היא איבדה את הספר',5,'הספרייה פתוחה רק מראשון עד חמישי, ושבת לא ביניהם.'],
+ ['המורה ביקשה לסדר את הכיסאות במעגל. התלמידים הזיזו את כל השולחנות לצד הכיתה.','למה הזיזו את השולחנות?','כדי שיהיה מקום למעגל','כדי לנקות אותם|כי הם שבורים|כדי לשבת עליהם',5,'כדי לסדר כיסאות במעגל צריך מקום פנוי באמצע.'],
+ ['בכיתה של עידו יש 25 ילדים. היום 3 ילדים חולים ונשארו בבית, ובצהריים עוד ילד אחד יצא לרופא.','כמה ילדים היו בכיתה בסוף היום?','21','22|24|25',5,'25 פחות 3 זה 22, ופחות עוד ילד אחד זה 21.']
+];
+const NAMES=[['נועה','f'],['יואב','m'],['איתי','m'],['מאיה','f'],['עומר','m'],['תמר','f'],['אורי','m'],['שירה','f'],['רון','m'],['ליה','f'],['דן','m'],['גאיה','f']];
+function namesWithChild(n){
+  let pool=NAMES.slice();
+  if(state.profile.name&&Math.random()<.5)pool=[[state.profile.name,state.profile.gender||'f'],...pool.filter(x=>x[0]!==state.profile.name)].slice(0,1).concat(shuffle(pool.filter(x=>x[0]!==state.profile.name)));
+  else pool=shuffle(pool);
+  return pool.slice(0,n);
+}
+
+/* --- generators: each returns {skill,prompt,speak,stim,opts,ans,explain} --- */
+const GEN={};
+GEN.analogy=L=>{
+  const id=pickBank('analogy',ANALOGY,5,L);const [a,b,c,d,x,,e]=ANALOGY[id];
+  const q={skill:'analogy',bankId:id,prompt:'המילה הראשונה קשורה למילה השנייה. איזו מילה קשורה באותה דרך למילה השלישית?',
+    stim:`<div class="anbox"><div class="words"><span class="word">${esc(a)}</span><span class="sep">◂</span><span class="word">${esc(b)}</span></div><div class="words"><span class="word">${esc(c)}</span><span class="sep">◂</span><span class="word q">?</span></div></div>`,
+    speak:`המילה ${a} קשורה למילה ${b}. איזו מילה קשורה באותה דרך למילה ${c}?`,explain:e};
+  return finishText(q,d,shuffle(x.split('|')));
+};
+GEN.oddword=L=>{
+  const id=pickBank('oddword',ODDW,3,L);const [o,odd,e]=ODDW[id];
+  const q={skill:'oddword',bankId:id,prompt:'שלוש מילים שייכות לאותה קבוצה. איזו מילה לא שייכת?',stim:'',speak:'שלוש מילים שייכות לאותה קבוצה. איזו מילה לא שייכת?',explain:`${e} לכן "${odd}" לא שייך.`};
+  return finishText(q,odd,o.split('|'));
+};
+GEN.reading=L=>{
+  const id=pickBank('reading',READING,4,L);const [p,qq,a,x,,e]=READING[id];
+  const q={skill:'reading',bankId:id,prompt:qq,lead:'קראו את הסיפור וענו על השאלה שמתחתיו:',promptAfter:true,stim:`<div class="passage">${esc(p)}</div>`,speak:`${p} ${qq}`,explain:e};
+  return finishText(q,a,shuffle(x.split('|')));
+};
+const DIMS=[
+  {big:['גבוה','גבוהה'],small:['נמוך','נמוכה'],qb:'הכי גבוה',qs:'הכי נמוך'},
+  {big:['מהיר','מהירה'],small:['איטי','איטית'],qb:'הכי מהיר',qs:'הכי איטי'},
+  {big:['מבוגר','מבוגרת'],small:['צעיר','צעירה'],qb:'הכי מבוגר',qs:'הכי צעיר'},
+  {big:['כבד','כבדה'],small:['קל','קלה'],qb:'הכי כבד',qs:'הכי קל'}
+];
+GEN.logic=L=>{
+  const n=[0,2,3,3,4,5][L];const people=namesWithChild(n);const D=pick(DIMS);
+  const adj=(p,w)=>D[w][p[1]==='m'?0:1];
+  let st=[];
+  for(let i=0;i<n-1;i++){const A=people[i],B=people[i+1];
+    const useSmall=L>=3&&Math.random()<.5;
+    st.push(useSmall?`${B[0]} ${adj(B,'small')} מ${A[0]}.`:`${A[0]} ${adj(A,'big')} מ${B[0]}.`)}
+  if(L>=3)st=shuffle(st);
+  let ask,ans;
+  if(L===1){const big=Math.random()<.5;ask=`מי ${big?D.big[0]:D.small[0]} יותר?`;ans=big?people[0][0]:people[1][0]}
+  else if(L===3&&Math.random()<.4){ask=`מי באמצע: לא ${D.qb} ולא ${D.qs}?`;ans=people[1][0]}
+  else{const big=Math.random()<.5;ask=`מי ${big?D.qb:D.qs}?`;ans=big?people[0][0]:people[n-1][0]}
+  const names=people.map(p=>p[0]);
+  const q={skill:'logic',prompt:ask,lead:'קראו את המשפטים וענו על השאלה שמתחתיהם:',promptAfter:true,stim:`<div class="passage">${st.map(esc).join('<br>')}</div>`,speak:`${st.join(' ')} ${ask}`,
+    explain:`הסדר הוא: ${names.join(' ← ')} (מ${D.qb.replace('הכי ','')} ל${D.qs.replace('הכי ','')}).`};
+  return finishText(q,ans,shuffle(names.filter(x=>x!==ans)));
+};
+GEN.wordprob=L=>{
+  const [P]=namesWithChild(1);const nm=P[0],m=P[1]==='m';const v=(a,b)=>m?a:b;
+  const items=pick([['מדבקות','מדבקה'],['גולות','גולה'],['סוכריות','סוכרייה'],['קלפים','קלף'],['עפרונות','עיפרון']]);
+  let text,ans,dis,ex;
+  if(L===1){const a=rnd(3,10),b=rnd(2,9);
+    if(Math.random()<.5){text=`ל${nm} יש ${a} ${items[0]}. ${v('הוא קיבל','היא קיבלה')} עוד ${b}. כמה ${items[0]} יש ל${nm} עכשיו?`;ans=a+b;dis=[Math.abs(a-b)];ex=`${a} ועוד ${b} שווה ${ans}.`}
+    else{const t=a+b;text=`ל${nm} היו ${t} ${items[0]}. ${v('הוא נתן','היא נתנה')} ${b} לחברים. כמה ${items[0]} נשארו?`;ans=a;dis=[t+b];ex=`${t} פחות ${b} שווה ${a}.`}}
+  else if(L===2){
+    if(Math.random()<.5){const [Q]=namesWithChild(2).filter(x=>x[0]!==nm);const a=rnd(8,30),d=rnd(3,15);
+      text=`ל${nm} יש ${a} ${items[0]}, ול${Q[0]} יש ${a+d}. כמה ${items[0]} יש ל${Q[0]} יותר מאשר ל${nm}?`;ans=d;dis=[2*a+d,a];ex=`${a+d} פחות ${a} שווה ${d}.`}
+    else{const a=rnd(2,6)*10,b=rnd(11,39);text=`בספרייה היו ${a} ספרים על המדף. הביאו עוד ${b} ספרים. כמה ספרים יש עכשיו על המדף?`;ans=a+b;dis=[a+b+10,a+b-10];ex=`${a} ועוד ${b} שווה ${ans}.`}}
+  else if(L===3){const a=rnd(15,28),b=rnd(3,9),c=rnd(2,8);
+    text=`בגינה שיחקו ${a} ילדים. ${b} ילדים הלכו הביתה, ואחר כך הגיעו עוד ${c}. כמה ילדים משחקים בגינה עכשיו?`;ans=a-b+c;dis=[a-b-c,a+b+c,a-b];ex=`${a} פחות ${b} זה ${a-b}, ועוד ${c} זה ${ans}.`}
+  else if(L===4){const k=rnd(2,5),mm=rnd(3,6);
+    if(Math.random()<.5){text=`יש ${k} קופסאות, ובכל קופסה ${mm} ${items[0]}. כמה ${items[0]} יש בסך הכול?`;ans=k*mm;dis=[k+mm,k*mm+mm,k*mm-k];ex=`${k} פעמים ${mm} שווה ${ans}.`}
+    else{text=`${nm} ${v('חילק','חילקה')} ${k*mm} ${items[0]} שווה בשווה בין ${k} חברים. כמה ${items[0]} קיבל כל חבר?`;ans=mm;dis=[k*mm-k,k,mm+k];ex=`${k*mm} מחולק ל-${k} שווה ${mm}, כי ${k} פעמים ${mm} זה ${k*mm}.`}}
+  else{const t=rnd(1,3);
+    if(t===1){const a=rnd(2,5),b=rnd(1,4);text=`בחצר יש ${a} תרנגולות ו-${b} כלבים. כמה רגליים יש לכולם יחד?`;ans=2*a+4*b;dis=[a+b,4*(a+b),2*(a+b)];ex=`לכל תרנגולת 2 רגליים: ${a}×2=${2*a}. לכל כלב 4 רגליים: ${b}×4=${4*b}. יחד ${ans}.`}
+    else if(t===2){const x=rnd(6,9),d=rnd(2,5),y=rnd(2,4);text=`${nm} ${v('בן','בת')} ${x}. האח הגדול ${v('שלו','שלה')} מבוגר ${v('ממנו','ממנה')} ב-${d} שנים. בן כמה יהיה האח בעוד ${y} שנים?`;ans=x+d+y;dis=[x+d,x+y,d+y];ex=`עכשיו האח בן ${x}+${d}=${x+d}. בעוד ${y} שנים הוא יהיה בן ${ans}.`}
+    else{const p=rnd(3,7),r=rnd(2,6);text=`${nm} ${v('עומד','עומדת')} בתור לגלידה במקום ה-${p} מההתחלה, ואחרי${v('יו','יה')} עומדים עוד ${r} ילדים. כמה ילדים בתור?`;ans=p+r;dis=[p+r-1,p+r+1,r];ex=`יש ${p} ילדים עד ${nm} (כולל ${v('אותו','אותה')}), ועוד ${r} אחרי${v('יו','יה')}: ${p}+${r}=${ans}.`}}
+  const q={skill:'wordprob',prompt:'בחרו את התשובה הנכונה.',lead:'קראו את הבעיה ופתרו אותה:',promptAfter:true,stim:`<div class="passage">${esc(text)}</div>`,speak:text,explain:ex};
+  return finishText(q,ans,shuffle(numDis(ans,dis)));
+};
+const FRUIT=[['🍎','תפוח'],['🍌','בננה'],['🍇','ענבים'],['🍓','תות'],['🍐','אגס']];
+GEN.symbols=L=>{
+  let lines=[],sp=[],ans,dis,ex,prompt='איזה מספר צריך להיות במקום סימן השאלה כדי שהתרגיל יהיה נכון?';
+  const box='<span class="num q" style="display:inline-grid">?</span>';
+  if(L===1){const a=rnd(3,12),b=rnd(2,9),c=a+b;lines=[`${a} + ${box} = ${c}`];sp=[`${a} ועוד כמה שווה ${c}?`];ans=b;dis=[c+a,c];ex=`${c} פחות ${a} שווה ${b}. בודקים: ${a}+${b}=${c}.`}
+  else if(L===2){if(Math.random()<.5){const b=rnd(4,15),c=rnd(5,30);lines=[`${box} − ${b} = ${c}`];sp=[`כמה פחות ${b} שווה ${c}?`];ans=b+c;dis=[c-b];ex=`${c} ועוד ${b} שווה ${b+c}.`}
+    else{const a=rnd(5,15),b=rnd(3,12),d=rnd(2,a+b-1);lines=[`${a} + ${b} = ${box} + ${d}`];sp=[`${a} ועוד ${b} שווה כמה ועוד ${d}?`];ans=a+b-d;dis=[a+b,a+b+d];ex=`${a}+${b}=${a+b}. כדי שגם הצד השני יהיה ${a+b}: ${a+b} פחות ${d} זה ${ans}.`}}
+  else{const[X,Y]=sample(FRUIT,2);
+    if(L===3){const x=rnd(2,9),k=Math.random()<.5?2:3;lines=[`${Array(k).fill(`<span class="em">${X[0]}</span>`).join(' + ')} = ${k*x}`];sp=[`${Array(k).fill(X[1]).join(' ועוד ')} שווה ${k*x}`];ans=x;prompt=`כל ציור מסמל מספר. כמה שווה ${X[1]} אחד?`;dis=[k*x,x*2,k*x-x];ex=`${k} פעמים ${X[1]} שווה ${k*x}, לכן ${X[1]} אחד שווה ${x}.`}
+    else if(L===4){const x=rnd(2,8),y=rnd(1,9);lines=[`<span class="em">${X[0]}</span> + <span class="em">${X[0]}</span> = ${2*x}`,`<span class="em">${X[0]}</span> + <span class="em">${Y[0]}</span> = ${x+y}`];sp=[`${X[1]} ועוד ${X[1]} שווה ${2*x}.`,`${X[1]} ועוד ${Y[1]} שווה ${x+y}.`];ans=y;prompt=`כל ציור מסמל מספר. כמה שווה ${Y[1]}?`;dis=[x,x+y,2*x];ex=`${X[1]} שווה ${x} (כי ${x}+${x}=${2*x}). אז ${Y[1]} שווה ${x+y} פחות ${x}, כלומר ${y}.`}
+    else{const y=rnd(2,6),x=2*y;lines=[`<span class="em">${X[0]}</span> + <span class="em">${X[0]}</span> + <span class="em">${X[0]}</span> = ${3*x}`,`<span class="em">${Y[0]}</span> + <span class="em">${Y[0]}</span> = <span class="em">${X[0]}</span>`,`<span class="em">${X[0]}</span> + <span class="em">${Y[0]}</span> = ${box}`];
+      sp=[`שלוש פעמים ${X[1]} שווה ${3*x}.`,`${Y[1]} ועוד ${Y[1]} שווה ${X[1]}.`,`כמה שווה ${X[1]} ועוד ${Y[1]}?`];ans=x+y;prompt='כל ציור מסמל מספר. מה המספר החסר?';dis=[x,y,2*x,x+2*y];ex=`${X[1]} שווה ${x} (כי 3×${x}=${3*x}). ${Y[1]} הוא חצי מ${X[1]}, כלומר ${y}. יחד: ${x}+${y}=${ans}.`}}
+  const q={skill:'symbols',prompt,stim:`<div class="eq">${lines.map(l=>`<div>${l}</div>`).join('')}</div>`,speak:`${prompt} ${sp.join(' ')}`,explain:ex};
+  return finishText(q,ans,shuffle(numDis(ans,dis)));
+};
+GEN.series=L=>{
+  let seq=[],ans,ex,missAt=-1;const N=5;
+  const t=pick({1:['add'],2:['add','sub'],3:['grow','alt','addMid'],4:['dbl','grow2','inter'],5:['dblp1','fib','altMul']}[L]);
+  if(t==='add'){const s=pick(L===1?[1,2,5,10]:[3,4,5]);const a=rnd(1,L===1?10:20);for(let i=0;i<=N;i++)seq.push(a+i*s);ex=`בכל צעד מוסיפים ${s}.`}
+  if(t==='sub'){const s=pick([2,3,5,10]);const a=s*N+rnd(5,30);for(let i=0;i<=N;i++)seq.push(a-i*s);ex=`בכל צעד מורידים ${s}.`}
+  if(t==='addMid'){const s=pick([3,4,6]);const a=rnd(2,15);for(let i=0;i<N;i++)seq.push(a+i*s);missAt=2;ex=`בכל צעד מוסיפים ${s}.`}
+  if(t==='grow'){let a=rnd(1,10);seq=[a];for(let i=1;i<=N;i++){a+=i;seq.push(a)}ex='מוסיפים כל פעם מספר גדול יותר: 1, 2, 3, 4...'}
+  if(t==='alt'){const p=rnd(3,5),m=rnd(1,2);let a=rnd(2,10);seq=[a];for(let i=1;i<=N;i++){a+=i%2?p:-m;seq.push(a)}ex=`מוסיפים ${p}, מורידים ${m}, וחוזר חלילה.`}
+  if(t==='dbl'){let a=rnd(1,3);seq=[a];for(let i=1;i<=N;i++){a*=2;seq.push(a)}ex='כל מספר הוא כפול מהמספר שלפניו.'}
+  if(t==='grow2'){let a=rnd(1,6);seq=[a];for(let i=1;i<=N;i++){a+=2*i;seq.push(a)}ex='מוסיפים 2, אחר כך 4, אחר כך 6, 8...'}
+  if(t==='inter'){const a=rnd(1,4),b=rnd(5,9)*10;for(let i=0;i<=N;i++)seq.push(i%2?b-((i-1)/2)*10:a+i/2);ex=`יש כאן שתי סדרות שמשולבות: ${a}, ${a+1}, ${a+2}... ו-${b}, ${b-10}, ${b-20}...`}
+  if(t==='dblp1'){let a=1;seq=[a];for(let i=1;i<=N;i++){a=a*2+1;seq.push(a)}ex='כל מספר: כפול מהקודם ועוד 1.'}
+  if(t==='fib'){let a=rnd(1,2),b=a;seq=[a,b];while(seq.length<=N){[a,b]=[b,a+b];seq.push(b)}ex='כל מספר הוא סכום שני המספרים שלפניו.'}
+  if(t==='altMul'){let a=rnd(1,4);seq=[a];for(let i=1;i<=N;i++){a=i%2?a*2:a+3;seq.push(a)}ex='כפול 2, ועוד 3, וחוזר חלילה.'}
+  let shown;
+  if(missAt>=0){ans=seq[missAt];shown=seq.slice(0,N).map((x,i)=>i===missAt?null:x)}
+  else{ans=seq[N];shown=seq.slice(0,N).concat([null])}
+  const diff=seq[1]-seq[0];
+  const q={skill:'series',prompt:'המספרים מסודרים לפי חוק. איזה מספר מתאים במקום סימן השאלה?',lead:'קוראים מימין לשמאל:',
+    stim:`<div class="seq">${shown.map(x=>x===null?'<span class="num q">?</span>':`<span class="num">${x}</span>`).join('<span class="sep">◂</span>')}</div>`,
+    speak:`איזה מספר חסר בסדרה? ${shown.map(x=>x===null?'סימן שאלה':x).join(', ')}`,explain:ex};
+  return finishText(q,ans,shuffle(numDis(ans,[ans+diff,ans-diff,seq[N-1],ans+2])));
+};
+GEN.shapeseries=L=>{
+  const sh=sample(SHAPES,3),co=sample(COLORS,3);let show=5,f,ex,attrs;
+  const mk=o=>F(Object.assign({shape:sh[0],color:co[0]},o));
+  const t=pick({1:['altShape','altColor'],2:['cyc3','rot90','altFill'],3:['countUp','s2c3'],4:['rot45c','size3s2'],5:['countSC','rotFillC']}[L]);
+  switch(t){
+    case 'altShape':f=i=>mk({shape:sh[i%2]});attrs=['shape'];ex=`הצורות מתחלפות: ${SHN[sh[0]]}, ${SHN[sh[1]]}, ${SHN[sh[0]]}, ${SHN[sh[1]]}...`;break;
+    case 'altColor':f=i=>mk({color:co[i%2]});attrs=['color'];ex=`הצבעים מתחלפים: ${COLN[co[0]]}, ${COLN[co[1]]}, ${COLN[co[0]]}...`;break;
+    case 'cyc3':f=i=>mk({shape:sh[i%3]});attrs=['shape'];ex=`שלוש צורות חוזרות באותו סדר: ${SHN[sh[0]]}, ${SHN[sh[1]]}, ${SHN[sh[2]]}.`;break;
+    case 'rot90':f=i=>mk({shape:'arrow',rot:(i*90)%360});attrs=['rot'];ex='החץ מסתובב רבע סיבוב בכל צעד, עם כיוון השעון.';break;
+    case 'altFill':f=i=>mk({fill:i%2===0});attrs=['fill'];ex='צורה מלאה וצורה ריקה מתחלפות.';break;
+    case 'countUp':show=4;f=i=>mk({count:i+1});attrs=['count'];ex='בכל צעד נוספת עוד צורה אחת.';break;
+    case 's2c3':f=i=>mk({shape:sh[i%2],color:co[i%3]});attrs=['shape','color'];ex='שתי צורות מתחלפות, ובנפרד שלושה צבעים חוזרים לפי הסדר. צריך לעקוב אחרי שניהם.';break;
+    case 'rot45c':f=i=>mk({shape:'arrow',rot:(i*45)%360,color:co[i%2]});attrs=['rot','color'];ex='החץ מסתובב שמינית סיבוב בכל צעד, והצבע מתחלף.';break;
+    case 'size3s2':f=i=>mk({shape:sh[i%2],size:(i%3)+1});attrs=['size','shape'];ex='הגודל עולה: קטן, בינוני, גדול ושוב מההתחלה. במקביל הצורה מתחלפת.';break;
+    case 'countSC':show=4;f=i=>mk({count:i+1,shape:sh[i%2],color:co[i%3]});attrs=['count','shape','color'];ex='בכל צעד נוספת צורה, הצורה מתחלפת, והצבעים חוזרים כל שלושה צעדים.';break;
+    case 'rotFillC':f=i=>mk({shape:'arrow',rot:(i*90)%360,fill:i%2===0,color:co[i%3]});attrs=['rot','fill','color'];ex='החץ מסתובב רבע סיבוב, מתחלף בין מלא לריק, והצבעים חוזרים כל שלושה צעדים.';break;
+  }
+  const seq=Array.from({length:show},(_,i)=>f(i)),ans=f(show);
+  const pools={shape:sh,color:co};
+  const dis=[f(show-1),...attrs.map(a=>mutate(ans,a,pools)),...attrs.map(a=>mutate(ans,a,pools)),f(show+1)];
+  const q={skill:'shapeseries',prompt:'הצורות משתנות לפי חוק. איזו צורה באה במקום סימן השאלה?',lead:'קוראים מימין לשמאל:',speak:'הצורות משתנות לפי חוק, מימין לשמאל. איזו צורה באה במקום סימן השאלה?',
+    stim:`<div class="seq">${seq.map(x=>`<div class="cell">${figSVG(x)}</div>`).join('<span class="sep">◂</span>')}<span class="sep">◂</span><div class="cell q">?</div></div>`,explain:ex};
+  return finishFig(q,ans,shuffle(dis),pools);
+};
+GEN.matrix=L=>{
+  const sh=sample(SHAPES,3),co=sample(COLORS,3);
+  let R={1:pick([{shape:'row',color:'col'},{shape:'col',color:'row'}]),2:{shape:'latin',color:'row'},3:{shape:'latin',color:'latin2'},4:{shape:'row',color:'latin',count:'col'},5:{shape:'latin',color:'latin2',count:'row'}}[L];
+  const idx=(r,rr,c)=>r==='row'?rr:r==='col'?c:r==='latin'?(rr+c)%3:r==='latin2'?(rr+2*c)%3:0;
+  const cell=(r,c)=>F({shape:sh[idx(R.shape,r,c)],color:co[idx(R.color,r,c)],count:R.count?idx(R.count,r,c)+1:1});
+  const ans=cell(2,2);
+  const word={shape:['צורה','כל צורה מופיעה'],color:['צבע','כל צבע מופיע'],count:['מספר צורות','כל מספר מופיע']};
+  const ex=Object.entries(R).map(([a,r])=>{
+    if(a==='count'&&r==='col')return 'מספר הצורות גדל מימין לשמאל: 1, 2, 3.';
+    if(a==='count'&&r==='row')return 'מספר הצורות גדל משורה לשורה: 1, 2, 3.';
+    if(r==='row')return `בכל שורה יש אותו ${word[a][0]}.`;
+    if(r==='col')return `בכל עמודה יש אותו ${word[a][0]}.`;
+    return `בכל שורה ובכל עמודה ${word[a][1]} פעם אחת.`;}).join(' ');
+  const pools={shape:sh,color:co};
+  const dis=[mutate(ans,'shape',pools),mutate(ans,'color',pools),cell(2,1),cell(1,2),R.count?mutate(ans,'count',{}):null,mutate(ans,'shape',pools)];
+  let html='';for(let r=0;r<3;r++)for(let c=0;c<3;c++)html+=(r===2&&c===2)?'<div class="cell q">?</div>':`<div class="cell">${figSVG(cell(r,c))}</div>`;
+  const q={skill:'matrix',prompt:'בלוח יש חוק שקובע את הצורות בשורות ובעמודות. איזו צורה מתאימה למקום הריק?',speak:'בלוח יש חוק שקובע את הצורות בשורות ובעמודות. איזו צורה מתאימה למקום הריק?',stim:`<div class="mx">${html}</div>`,explain:ex};
+  return finishFig(q,ans,dis,pools);
+};
+GEN.shapeanalogy=L=>{
+  const n=L<=2?1:L<=4?2:3;const pool=L===1?['color','size']:['color','size','fill','count','rot'];
+  const T=sample(pool,n);const shp=sample(SHAPES,2),cc=sample(COLORS,3);
+  const A=F({shape:shp[0],color:cc[0],size:3});const C=F({shape:shp[1],color:cc[0],size:3});
+  const sizeDir=Math.random()<.5?'down':'up';
+  if(T.includes('size')&&sizeDir==='up'){A.size=1;C.size=1}
+  if(T.includes('count')){const k=rnd(1,2);A.count=k;C.count=k}
+  if(T.includes('rot')){A.shape='arrow';C.shape='arrow';A.rot=0;C.rot=pick([90,180]);if(!T.includes('color'))C.color=cc[2]}
+  const tf={color:x=>({...x,color:cc[1]}),size:x=>({...x,size:sizeDir==='down'?1:3}),fill:x=>({...x,fill:!x.fill}),count:x=>({...x,count:x.count+1}),rot:x=>({...x,rot:(x.rot+90)%360})};
+  const apply=(x,skip)=>T.reduce((acc,t)=>t===skip?acc:tf[t](acc),{...x});
+  const B=apply(A),D=apply(C);
+  const words={color:`הצבע משתנה ל${COLN[cc[1]]}.`,size:sizeDir==='down'?'הצורה נעשית קטנה.':'הצורה נעשית גדולה.',fill:'הצורה נהיית ריקה מבפנים.',count:'נוספת עוד צורה אחת.',rot:'החץ מסתובב רבע סיבוב עם כיוון השעון.'};
+  const dis=[B,C,...T.map(t=>apply(C,t)),T.includes('color')?{...D,color:cc[2]}:null,T.includes('rot')?{...D,rot:(C.rot+270)%360}:null,T.includes('size')?{...D,size:2}:null];
+  const q={skill:'shapeanalogy',prompt:'בשורה העליונה, הצורה הימנית השתנתה לצורה שלידה. איזו צורה נקבל אם נשנה באותה דרך את הצורה בשורה התחתונה?',speak:'בשורה העליונה, הצורה הימנית השתנתה לצורה שלידה. איזו צורה נקבל אם נשנה באותה דרך את הצורה בשורה התחתונה?',
+    stim:`<div class="anbox"><div class="anrow"><div class="cell">${figSVG(A)}</div><span class="sep">◂</span><div class="cell">${figSVG(B)}</div></div><div class="anrow"><div class="cell">${figSVG(C)}</div><span class="sep">◂</span><div class="cell q">?</div></div></div>`,
+    explain:`${T.map(t=>words[t]).join(' ')} אותו שינוי קורה גם לצורה השנייה.`};
+  return finishFig(q,D,dis.filter(Boolean),{shape:shp,color:cc});
+};
+GEN.oddshape=L=>{
+  const cfg={1:['shape',[]],2:['color',['shape']],3:['shape',['color']],4:[pick(['fill','count']),['shape','color']],5:[pick(['count','size']),['shape','color']]}[L];
+  const [rule,vary]=cfg;const s4=sample(SHAPES,4),c4=sample(COLORS,4);
+  const items=[0,1,2,3].map(i=>{const f=F({shape:s4[0],color:c4[0],size:rule==='size'?3:2});vary.forEach(v=>f[v]=v==='shape'?s4[i]:c4[i]);return f});
+  const odd=rnd(0,3);let common,oddDesc;
+  if(rule==='shape'){const [x,y]=vary.includes('shape')?[s4[0],s4[1]]:sample(SHAPES,2);items.forEach(f=>f.shape=x);items[odd].shape=y;common=`יש אותה צורה: ${SHN[x]}`;oddDesc=`${SHN[y]}`}
+  if(rule==='color'){const [x,y]=sample(COLORS,2);items.forEach(f=>f.color=x);items[odd].color=y;common=`יש אותו צבע: ${COLN[x]}`;oddDesc=COLN[y]}
+  if(rule==='fill'){items[odd].fill=false;common='הצורות מלאות בצבע';oddDesc='ריקה מבפנים'}
+  if(rule==='count'){const k=rnd(1,3);items.forEach(f=>f.count=k);items[odd].count=k+1;common=`יש ${k===1?'צורה אחת':k+' צורות'}`;oddDesc=`${k+1} צורות`}
+  if(rule==='size'){items[odd].size=1;common='הצורות גדולות';oddDesc='קטנה'}
+  const q={skill:'oddshape',prompt:'שלוש צורות דומות זו לזו במשהו אחד. איזו צורה שונה מהן?',speak:'שלוש צורות דומות זו לזו במשהו אחד. איזו צורה שונה מהן?',stim:'',
+    explain:`בשלוש הצורות האחרות ${common}. בצורה שלא שייכת: ${oddDesc}.`,optType:'fig',
+    opts:items.map(f=>({html:figSVG(f),text:''})),ans:odd};
+  return q;
+};
+function gridSVG(gr){
+  const n=gr.length,s=100/n;let h='';
+  gr.forEach((row,r)=>row.forEach((v,c)=>{h+=`<rect x="${(c*s+1).toFixed(1)}" y="${(r*s+1).toFixed(1)}" width="${(s-2).toFixed(1)}" height="${(s-2).toFixed(1)}" rx="2" fill="${v?COL[v]:'#f1f2f8'}" stroke="#c9cce0" stroke-width="1"/>`}));
+  return `<svg viewBox="0 0 100 100" class="fig" aria-hidden="true">${h}</svg>`;
+}
+GEN.mirror=L=>{
+  const n=L<=2?3:4,k=[0,3,4,5,6,7][L],cs=sample(COLORS,2),two=L>=4;
+  const key=gr=>gr.map(r=>r.map(v=>v||'.').join('')).join('/');
+  const flipH=gr=>gr.map(r=>r.slice().reverse()),flipV=gr=>gr.slice().reverse().map(r=>r.slice()),rot=gr=>flipV(flipH(gr));
+  let gr,guard=0;
+  do{gr=Array.from({length:n},()=>Array(n).fill(null));const cells=sample([...Array(n*n).keys()],k);cells.forEach((ci,i)=>gr[Math.floor(ci/n)][ci%n]=two&&i%2?cs[1]:cs[0])}
+  while(guard++<200&&(key(flipH(gr))===key(gr)||key(flipV(gr))===key(gr)||key(rot(gr))===key(gr)));
+  const corr=flipH(gr);
+  const oneOff=()=>{const g2=corr.map(r=>r.slice());const filled=[],empty=[];g2.forEach((r,ri)=>r.forEach((v,ci)=>(v?filled:empty).push([ri,ci])));const[a,b]=pick(filled),[c,d]=pick(empty);g2[c][d]=g2[a][b];g2[a][b]=null;return g2};
+  const cands=[gr,flipV(gr),L>=3?rot(gr):oneOff(),oneOff(),oneOff(),oneOff()];
+  const seen=new Set([key(corr)]),list=[corr];
+  for(const c of cands){const kk=key(c);if(!seen.has(kk)){seen.add(kk);list.push(c)}if(list.length>=4)break}
+  const opts=shuffle(list);
+  return {skill:'mirror',prompt:'הקו המקווקו הוא מראה. איך ייראה הציור כשמסתכלים עליו במראה?',speak:'הקו המקווקו הוא מראה. איך תיראה התמונה במראה?',
+    stim:`<div class="mirror"><div class="mbox">${gridSVG(gr)}</div><div class="mline"></div><div class="mbox"><div class="cell q" style="width:100%">?</div></div></div>`,
+    explain:'במראה, מה שבצד ימין עובר לצד שמאל, ומה שבשמאל עובר לימין. למעלה ולמטה נשארים במקום.',
+    optType:'fig',opts:opts.map(x=>({html:gridSVG(x),text:''})),ans:opts.findIndex(x=>key(x)===key(corr))};
+};
+
+/* ============ adaptive engine + plan ============ */
+function planInfo(){
+  const today=dkey(),s=state.settings;
+  let daysLeft=null,frac;
+  if(s.testDate){daysLeft=daysBetween(today,s.testDate);const total=Math.max(1,daysBetween(state.startDate,s.testDate));frac=clamp(daysBetween(state.startDate,today)/total,0,1)}
+  else frac=clamp(daysBetween(state.startDate,today)/45,0,1);
+  return {today,daysLeft,frac,target:1.6+3.2*frac};
+}
+function skillStatus(k){
+  const s=state.skills[k],t=planInfo().target;
+  if(s.n<3)return ['new','עוד לא תורגל'];
+  const d=s.lvl-t;
+  if(d>.5)return ['ahead','מקדים את התוכנית'];
+  if(d>-.6)return ['ok','בקצב'];
+  return ['behind','צריך חיזוק'];
+}
+function focusWeight(k){
+  const f=state.settings.focus,st=SKILLS[k].stage;
+  if(f==='both'||st.includes(f))return 1;
+  return f==='A'?.25:.35;
+}
+function chooseSkill(recent){
+  const t=planInfo().target;
+  const ks=Object.keys(SKILLS);
+  const w=ks.map(k=>{const s=state.skills[k];let x=focusWeight(k)*(1+Math.max(0,t-s.lvl)*1.4+(s.n<4?1:0));
+    if(recent.slice(-2).includes(k))x*=.15;if(recent.slice(-1)[0]===k)x=0;return x});
+  let r=Math.random()*w.reduce((a,b)=>a+b,0);
+  for(let i=0;i<ks.length;i++){r-=w[i];if(r<=0)return ks[i]}
+  return ks[0];
+}
+function levelFor(k,warm){
+  const s=state.skills[k];let L=Math.floor(s.lvl);
+  if(warm)L=Math.max(1,L-1);else if(Math.random()<.18)L-=1;
+  return clamp(L,1,5);
+}
+function makeQ(k,warm){
+  const L=levelFor(k,warm);
+  try{const q=GEN[k](L);q.level=L;if(q.ans<0||!q.opts||q.opts.length<2)throw 0;return q}
+  catch(e){const q=GEN.series(1);q.level=1;return q}
+}
+function missionSize(kind){
+  const base=clamp(Math.round(state.settings.minutes*60/state.avgSec),5,40);
+  if(kind==='bonus')return clamp(Math.round(base/2),5,15);
+  if(kind==='exam')return 12;
+  return base;
+}
+
+/* ============ routing ============ */
+let current=null;
+function show(id){
+  stopSpeak();
+  document.querySelectorAll('.screen').forEach(s=>s.hidden=true);
+  $('#s-'+id).hidden=false;$('#s-'+id).scrollTop=0;current=id;closeSheet();
+}
+function boot(){
+  document.body.dataset.world=state.profile.world||'';
+  if(!state.profile.name||!state.profile.world||!state.profile.char)renderSetup(state.profile.name?(state.profile.world?2:1):0);
+  else renderHome();
+}
+
+/* ============ setup ============ */
+let setupStep=0;
+function renderSetup(step=0){
+  setupStep=step;const p=state.profile,s=state.settings;
+  const steps=`<div class="steps">${[0,1,2,3].map(i=>`<i class="${i<=step?'on':''}"></i>`).join('')}</div>`;
+  let body='';
+  if(step===0){body=`<h1 class="onbg" style="font-size:2.2rem;text-align:center">ברוכים הבאים למסע החשיבה!</h1>
+    <div class="card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="field"><label for="in-name" style="font-family:var(--fd);font-size:1.4rem;font-weight:600">איך קוראים לך?</label><input id="in-name" maxlength="16" value="${esc(p.name)}" placeholder="השם שלי" autocomplete="off"></div>
+      <div class="chips" role="group" aria-label="בן או בת"><button class="chipbtn ${p.gender==='f'?'sel':''}" data-g="f">אני בת</button><button class="chipbtn ${p.gender==='m'?'sel':''}" data-g="m">אני בן</button></div>
+      <button class="btn big" id="nx">המשך ←</button></div>`}
+  if(step===1){body=`<h1 class="onbg" style="font-size:2rem;text-align:center">לאן נצא למסע?</h1>
+    <div class="pickgrid">${Object.entries(WORLDS).map(([k,w])=>`<button class="pickcard ${p.world===k?'sel':''}" data-w="${k}"><span class="e">${w.e}</span>${w.name}</button>`).join('')}</div>
+    <button class="btn big" id="nx">המשך ←</button>`}
+  if(step===2){const w=WORLDS[p.world];body=`<h1 class="onbg" style="font-size:2rem;text-align:center">מי ${g('יהיה החבר','תהיה החברה')} שלך למסע?</h1>
+    <div class="pickgrid">${w.chars.map(c=>`<button class="pickcard ${p.char===c?'sel':''}" data-c="${c}"><span class="e" style="font-size:4rem">${c}</span></button>`).join('')}</div>
+    <button class="btn big" id="nx">המשך ←</button>`}
+  if(step===3){body=`<h1 class="onbg" style="font-size:2rem;text-align:center">רגע להורים</h1>
+    <div class="card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="field"><label for="in-date">מתי המבחן? (אפשר להשאיר ריק)</label><input type="date" id="in-date" value="${s.testDate}" min="${dkey()}"></div>
+      <div class="field"><span>כמה דקות ביום יש לתרגול?</span><div class="chips" id="mins">${[10,15,20,30].map(m=>`<button class="chipbtn ${s.minutes===m?'sel':''}" data-m="${m}">${m} דקות</button>`).join('')}</div></div>
+      <div class="field"><span>על מה להתמקד?</span><div class="chips" id="focus">${[['both','שני השלבים'],['A',"שלב א'"],['B',"שלב ב'"]].map(([v,t])=>`<button class="chipbtn ${s.focus===v?'sel':''}" data-f="${v}">${t}</button>`).join('')}</div></div>
+      <p class="muted" style="margin:0;line-height:1.6">המשחק מתאים את עצמו: אורך המשימה היומית נקבע לפי הדקות שבחרתם ולפי הקצב שבו הילד או הילדה עונים בפועל. רמת הקושי עולה ויורדת בכל נושא בנפרד, והתוכנית נפרסת עד יום המבחן.</p>
+      <button class="btn big" id="nx">מתחילים!</button></div>`}
+  $('#s-setup').innerHTML=`<div class="wrap">${steps}${body}</div>`;show('setup');
+  const root=$('#s-setup');
+  root.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{p.gender=b.dataset.g;p.name=$('#in-name').value.trim();sfx.tap();renderSetup(0)});
+  root.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{p.world=b.dataset.w;p.char='';document.body.dataset.world=p.world;sfx.tap();renderSetup(1)});
+  root.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{p.char=b.dataset.c;sfx.tap();renderSetup(2)});
+  root.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{s.minutes=+b.dataset.m;s.testDate=$('#in-date').value;renderSetup(3)});
+  root.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{s.focus=b.dataset.f;s.testDate=$('#in-date').value;renderSetup(3)});
+  $('#nx').onclick=()=>{
+    if(step===0){p.name=$('#in-name').value.trim();if(!p.name||!p.gender){toast(!p.name?'כתבו שם':'בחרו בן או בת');return}renderSetup(1)}
+    else if(step===1){if(!p.world){toast('בחרו עולם');return}renderSetup(2)}
+    else if(step===2){if(!p.char){toast('בחרו דמות');return}renderSetup(3)}
+    else{s.testDate=$('#in-date').value||'';state.startDate=state.startDate||dkey();save();sfx.win();confetti();renderHome()}
+  };
+}
+
+/* ============ home ============ */
+function charLevel(){return 1+Math.floor(state.stars/40)}
+const BADGES=['','⭐','🏅','🎖️','👑','💎'];
+function cheer(){
+  const n=state.profile.name;
+  return pick([`היי ${n}! ${g('מוכן','מוכנה')} למסע של היום?`,`${n}, המוח שלך הוא שריר. בוא${g('','י')} נאמן אותו!`,`כל תשובה מקרבת אותנו ל${WORLDS[state.profile.world].place} הבא!`,`${g('אתה חושב','את חושבת')} מצוין. יוצאים לדרך?`]);
+}
+function renderHome(){
+  document.body.dataset.world=state.profile.world;
+  const P=planInfo(),w=WORLDS[state.profile.world],day=state.days[P.today]||{q:0,c:0,sec:0,missions:0};
+  const doneToday=day.missions>0;const N=missionSize('daily');const lv=charLevel();
+  // journey path
+  let nodes=[];
+  for(let i=-3;i<=0;i++){const k=addDays(P.today,i);if(i<0&&daysBetween(state.startDate,k)<0)continue;const d=state.days[k];nodes.push({k,cls:i===0?(doneToday?'done':'today'):(d&&d.missions?'done':'missed'),lab:i===0?'היום':dowOf(k)})}
+  const ahead=P.daysLeft!==null?Math.min(Math.max(P.daysLeft-1,0),6):5;
+  for(let i=1;i<=ahead;i++){const k=addDays(P.today,i);nodes.push({k,cls:'',lab:dowOf(k)})}
+  const pathHtml=nodes.map(n=>`<div class="node ${n.cls}"><div class="dot">${n.cls==='done'?'✓':n.cls==='today'?'★':''}</div>${n.lab}</div>`).join('<div class="link"></div>')+
+    (P.daysLeft!==null&&P.daysLeft>=0?`<div class="link"></div><div class="node goal"><div class="dot">🏆</div>מבחן</div>`:'');
+  const daysTxt=P.daysLeft===null?'אין תאריך מבחן, מתאמנים כל יום':P.daysLeft>0?`עוד ${P.daysLeft} ימים למבחן`:P.daysLeft===0?'המבחן היום! בהצלחה!':'המבחן כבר עבר. אפשר להמשיך להתאמן';
+  const showExam=P.daysLeft!==null&&P.daysLeft<=21||state.skills.series.n>15;
+  $('#s-home').innerHTML=`<div class="wrap">
+    <div class="topbar">
+      <div class="avatar">${state.profile.char}${lv>1?`<span class="badge">${lv}</span>`:''}</div>
+      <div class="hello onbg">${esc(state.profile.name)} ${BADGES[Math.min(lv-1,5)]||''}</div><div class="spacer"></div>
+      <div class="pill" title="כוכבים">⭐ ${state.stars}</div>
+      <div class="pill" title="ימים ברצף">🔥 ${state.streak.count}</div>
+    </div>
+    <div class="card hero">
+      <div class="char">${state.profile.char}</div>
+      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+        <div class="bubble">${esc(cheer())}</div>
+        ${doneToday?`<h2 class="mission-title">המשימה של היום הושלמה! ✓</h2>
+          <div class="meta"><span class="tag">${day.c} מתוך ${day.q} נכונות</span><span class="tag">${Math.round(day.sec/60)} דקות</span></div>
+          <button class="btn big" id="go-bonus">סיבוב בונוס ✨</button>`
+        :`<h2 class="mission-title">המשימה של היום</h2>
+          <div class="meta"><span class="tag">${N} שאלות</span><span class="tag">בערך ${state.settings.minutes} דקות</span><span class="tag">${w.name}</span></div>
+          <button class="btn big" id="go">יוצאים לדרך! 🚀</button>`}
+      </div>
+    </div>
+    <div class="card"><div class="row" style="justify-content:space-between"><h3>המסע שלי</h3><span class="muted">${daysTxt}</span></div><div class="path">${pathHtml}</div></div>
+    <div class="grid2">
+      ${showExam?`<button class="tile" id="go-exam"><span class="e">⏱️</span>אתגר מבחן<small>12 שאלות עם שעון</small></button>`:`<button class="tile" id="go-bonus2"><span class="e">✨</span>סיבוב קצר<small>עוד כמה שאלות</small></button>`}
+      <button class="tile" id="go-coll"><span class="e">${w.items[0]}</span>האוסף שלי<small>${state.collection.filter(x=>w.items.includes(x)).length} מתוך ${w.items.length}</small></button>
+    </div>
+    <div class="card"><h3 style="margin-bottom:12px">הכוחות שלי</h3><div class="skills">${Object.entries(SKILLS).filter(([k])=>focusWeight(k)>=1).map(([k,s])=>{const L=Math.floor(state.skills[k].lvl);return `<div class="sk"><b>${s.e} ${s.name}</b><div class="lv">${[1,2,3,4,5].map(i=>`<i class="${i<=L?'on':''}"></i>`).join('')}</div></div>`}).join('')}</div></div>
+    <div class="row" style="justify-content:center"><button class="btn ghost" id="go-parent">אזור הורים 🔒</button></div>
+  </div>`;
+  show('home');
+  const on=(id,fn)=>{const el=$('#'+id);if(el)el.onclick=fn};
+  on('go',()=>startMission('daily'));on('go-bonus',()=>startMission('bonus'));on('go-bonus2',()=>startMission(doneToday?'bonus':'daily'));
+  on('go-exam',()=>startMission('exam'));on('go-coll',renderColl);on('go-parent',renderGate);
+}
+
+/* ============ play ============ */
+let M=null;
+function startMission(kind){
+  sfx.tap();
+  M={kind,total:missionSize(kind),i:0,correct:0,stars:0,combo:0,recent:[],t0:Date.now(),sec:0,q:null,qStart:0,locked:false,timer:null};
+  nextQ();
+}
+function nextQ(){
+  clearInterval(M.timer);closeSheet();
+  const overTime=M.kind==='daily'&&(Date.now()-M.t0)/1000>state.settings.minutes*60*1.3&&M.i>=5;
+  if(M.i>=M.total||overTime)return finishMission();
+  const k=chooseSkill(M.recent);M.recent.push(k);
+  M.q=makeQ(k,M.i<2&&M.kind!=='exam');M.qStart=Date.now();M.locked=false;
+  renderPlay();
+  if(state.settings.autoRead)setTimeout(()=>speakQ(),250);
+}
+function speakQ(){const q=M.q;let t=q.promptAfter?`${q.speak||''} ${q.prompt}`:(q.speak||q.prompt);if(q.optType==='text')t+='. התשובות: '+q.opts.map(o=>o.text).join(', ');speak(t)}
+function renderPlay(){
+  const q=M.q,sk=SKILLS[q.skill];
+  $('#s-play').innerHTML=`<div class="wrap">
+    <div class="playbar"><button class="ibtn" id="quit" aria-label="יציאה">✕</button><div class="prog"><i style="width:${(M.i/M.total*100).toFixed(1)}%"></i></div><div class="pill">⭐ ${state.stars}</div></div>
+    <div class="card qcard">
+      ${M.kind==='exam'?'<div class="timer"><i id="tbar"></i></div>':''}
+      <div class="qhead"><span class="sktag">${sk.e} ${sk.name}</span><span class="stars-lv" aria-label="רמה ${q.level}">${'★'.repeat(q.level)}</span><div class="spacer"></div>
+        ${M.combo>=3?`<span class="tag">🔥 רצף ${M.combo}</span>`:''}<button class="ibtn saybtn" id="say" aria-label="הקראה">🔊</button></div>
+      ${q.promptAfter?'':`<div class="prompt">${esc(q.prompt)}</div>`}
+      ${q.lead?`<div class="lead">${esc(q.lead)}</div>`:''}
+      ${q.stim?`<div class="stim">${q.stim}</div>`:''}
+      ${q.promptAfter?`<div class="prompt">${esc(q.prompt)}</div>`:''}
+    </div>
+    <div class="opts ${q.optType==='fig'?'figs':''}" id="opts">${q.opts.map((o,i)=>`<button class="opt ${q.optType==='fig'?'fig':''}" data-i="${i}" aria-label="תשובה ${i+1}">${o.html}</button>`).join('')}</div>
+  </div>`;
+  show('play');
+  $('#say').onclick=()=>speaking?stopSpeak():speakQ();
+  $('#quit').onclick=askQuit;
+  document.querySelectorAll('#opts .opt').forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+  if(M.kind==='exam'){const lim=45;const t0=Date.now();const bar=$('#tbar');
+    M.timer=setInterval(()=>{const el=(Date.now()-t0)/1000;if(bar)bar.style.transform=`scaleX(${Math.max(0,1-el/lim)})`;if(el>=lim){clearInterval(M.timer);answer(-1)}},200)}
+}
+function answer(i){
+  if(M.locked)return;M.locked=true;clearInterval(M.timer);stopSpeak();
+  const q=M.q,ok=i===q.ans,sec=(Date.now()-M.qStart)/1000;
+  const btns=document.querySelectorAll('#opts .opt');
+  btns.forEach((b,j)=>{if(j===q.ans)b.classList.add('ok');else if(j===i)b.classList.add('no');else b.classList.add('dim')});
+  // update adaptive model
+  const s=state.skills[q.skill];s.n++;s.t+=Math.min(sec,180);s.h=(s.h||[]).concat(ok?1:0).slice(-20);
+  if(ok){s.c++;s.lvl=Math.min(5.99,s.lvl+(sec<25?.42:.32))}else{s.lvl=Math.max(1,s.lvl-.42);if(q.bankId!==undefined){const r=state.retry[q.skill]=state.retry[q.skill]||[];if(!r.includes(q.bankId))r.push(q.bankId)}}
+  state.avgSec=state.avgSec*.85+clamp(sec+6,12,120)*.15;
+  const today=dkey();const d=state.days[today]=state.days[today]||{q:0,c:0,sec:0,missions:0};
+  d.q++;if(ok)d.c++;d.sec+=Math.min(sec,180)+5;
+  M.i++;M.sec+=sec;
+  if(ok){M.correct++;M.combo++;const gain=1+(M.combo>=3?1:0)+(M.kind==='exam'?1:0);M.stars+=gain;state.stars+=gain;
+    sfx.ok();if(M.combo===3||M.combo===5||M.combo===8){sfx.combo();toast(`🔥 רצף ${M.combo}!`)}confetti(M.combo>=3?60:30);
+    const lvBefore=1+Math.floor((state.stars-gain)/40);if(charLevel()>lvBefore)setTimeout(()=>toast(`${state.profile.char} עלה לרמה ${charLevel()}!`),600)}
+  else{M.combo=0;sfx.bad()}
+  save();
+  document.querySelector('.prog>i').style.width=(M.i/M.total*100).toFixed(1)+'%';
+  const praise=pick(['מעולה!','כל הכבוד!','יפה מאוד!',g('אלוף!','אלופה!'),'בדיוק!','וואו!',g('חכם!','חכמה!'),'נכון!']);
+  const timeout=i===-1;
+  openSheet(ok?'good':'bad',`<h3>${ok?praise:timeout?'נגמר הזמן':'כמעט!'}</h3>
+    ${ok?(q.level>=4?`<div class="explain">${esc(q.explain)}</div>`:''):`<div class="explain">${esc(q.explain)}</div>`}
+    <div class="row"><button class="btn big" id="cont">${M.i>=M.total?'לסיום ←':'הבא ←'}</button>${ok?'':'<button class="ibtn saybtn" id="sayx" aria-label="הקראה">🔊</button>'}</div>`);
+  $('#cont').onclick=()=>{sfx.tap();stopSpeak();nextQ()};
+  const sx=$('#sayx');if(sx)sx.onclick=()=>toggleSpeak(q.explain);
+  if(ok&&q.level<4)M.auto=setTimeout(()=>{if(current==='play'&&M.locked)nextQ()},1300);
+}
+function askQuit(){
+  stopSpeak();
+  openSheet('',`<h3>לצאת מהמשימה?</h3><div class="explain">הכוכבים וההתקדמות נשמרו.</div>
+    <div class="row"><button class="btn" id="q-stay">ממשיכים לשחק</button><button class="btn ghost" id="q-go">יציאה</button></div>`);
+  $('#q-stay').onclick=closeSheet;$('#q-go').onclick=()=>{clearInterval(M.timer);clearTimeout(M.auto);logSession(false);M=null;renderHome()};
+}
+function logSession(completed){
+  if(!M||M.i===0)return;
+  state.sessions.push({d:dkey(),kind:M.kind,q:M.i,c:M.correct,sec:Math.round(M.sec),done:completed});
+  state.sessions=state.sessions.slice(-80);save();
+}
+function finishMission(){
+  clearTimeout(M.auto);clearInterval(M.timer);
+  const today=dkey();const d=state.days[today];
+  if(M.kind==='daily'||M.kind==='bonus'){
+    if(M.kind==='daily'&&!d.missions){
+      const y=addDays(today,-1);state.streak.count=state.streak.last===y?state.streak.count+1:(state.streak.last===today?state.streak.count:1);state.streak.last=today;
+    }
+    d.missions=(d.missions||0)+(M.kind==='daily'?1:0);if(M.kind==='bonus'&&!d.missions){d.missions=1;state.streak.count=state.streak.last===addDays(today,-1)?state.streak.count+1:1;state.streak.last=today}
+  }
+  logSession(true);
+  const w=WORLDS[state.profile.world];const earnChest=M.kind!=='exam'||M.correct>=8;
+  const pct=Math.round(M.correct/Math.max(1,M.i)*100);
+  const title=M.kind==='exam'?(pct>=75?'אתגר המבחן: מצוין!':'כל הכבוד על האתגר!'):'סיימת את המשימה!';
+  $('#s-done').innerHTML=`<div class="wrap" style="align-items:stretch">
+    <h1 class="onbg" style="text-align:center;font-size:2.3rem">${title}</h1>
+    <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center">
+      <div id="chestbox">${earnChest?`<button class="chest" id="chest" aria-label="פתיחת התיבה">🎁</button><div class="muted" style="font-size:1.2rem">לחצו על התיבה!</div>`:`<div style="font-size:5rem">${state.profile.char}</div><div class="muted">בפעם הבאה, 8 תשובות נכונות פותחות תיבה!</div>`}</div>
+      <div class="stats" style="width:100%"><div class="stat"><b>${M.correct}/${M.i}</b>נכונות</div><div class="stat"><b>+${M.stars}</b>כוכבים</div><div class="stat"><b>${Math.max(1,Math.round(M.sec/60))}</b>דקות</div></div>
+      <button class="btn big" id="home">חזרה למסע</button>
+    </div></div>`;
+  show('done');sfx.win();confetti(120);
+  $('#home').onclick=()=>{M=null;renderHome()};
+  const ch=$('#chest');if(ch)ch.onclick=()=>{
+    const left=w.items.filter(x=>!state.collection.includes(x));let html;
+    if(left.length){const it=pick(left);state.collection.push(it);html=`<div class="prize">${it}</div><div style="font-family:var(--fd);font-size:1.4rem;font-weight:600">${g('קיבלת','קיבלת')} פריט חדש לאוסף!</div>`}
+    else{state.stars+=10;html=`<div class="prize">⭐</div><div style="font-family:var(--fd);font-size:1.4rem;font-weight:600">האוסף מלא! קיבלת 10 כוכבים</div>`}
+    save();sfx.win();confetti(90);$('#chestbox').innerHTML=html;
+  };
+}
+
+/* ============ sheet ============ */
+function openSheet(cls,html){$('#sheet-host').innerHTML=`<div class="sheet ${cls}"><div class="in">${html}</div></div>`}
+function closeSheet(){$('#sheet-host').innerHTML=''}
+
+/* ============ collection ============ */
+function renderColl(){
+  const w=WORLDS[state.profile.world];const have=w.items.filter(x=>state.collection.includes(x)).length;
+  $('#s-coll').innerHTML=`<div class="wrap">
+    <div class="topbar"><button class="ibtn" id="back" aria-label="חזרה">→</button><h1 class="onbg" style="font-size:1.9rem">האוסף שלי</h1></div>
+    <div class="card"><p style="margin:0 0 14px;font-size:1.15rem">${have} מתוך ${w.items.length} פריטים. כל משימה שמסיימים פותחת תיבה עם פריט חדש.</p>
+      <div class="coll">${w.items.map(x=>state.collection.includes(x)?`<div class="slot">${x}</div>`:`<div class="slot locked">?</div>`).join('')}</div></div>
+    <div class="card"><h3 style="margin-bottom:10px">הדמות שלי</h3><div class="row"><div class="avatar" style="width:90px;height:90px;font-size:3.4rem">${state.profile.char}</div>
+      <div><div style="font-family:var(--fd);font-size:1.4rem;font-weight:600">רמה ${charLevel()} ${BADGES[Math.min(charLevel()-1,5)]||''}</div><div class="muted">עוד ${40-state.stars%40} כוכבים לרמה הבאה</div></div></div></div>
+  </div>`;
+  show('coll');$('#back').onclick=renderHome;
+}
+
+/* ============ parent gate + area ============ */
+let gateAns=0;
+function renderGate(){
+  const a=rnd(12,19),b=rnd(3,8);gateAns=a*b;
+  $('#s-gate').innerHTML=`<div class="wrap"><div class="topbar"><button class="ibtn" id="back" aria-label="חזרה">→</button><h1 class="onbg" style="font-size:1.9rem">אזור הורים</h1></div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px"><div class="field"><label for="gate-in">כדי להיכנס, כמה זה ${a} × ${b}?</label><input id="gate-in" inputmode="numeric" autocomplete="off"></div>
+    <button class="btn" id="gate-go">כניסה</button></div></div>`;
+  show('gate');$('#back').onclick=renderHome;
+  const go=()=>{if(+$('#gate-in').value===gateAns)renderParent();else toast('לא נכון, נסו שוב')};
+  $('#gate-go').onclick=go;$('#gate-in').onkeydown=e=>{if(e.key==='Enter')go()};
+}
+function renderParent(){
+  const P=planInfo(),s=state.settings;
+  const rows=Object.entries(SKILLS).map(([k,sk])=>{const x=state.skills[k];const [cls,lab]=skillStatus(k);
+    return `<tr><td>${sk.name}<br><span class="muted" style="font-size:.85rem">${sk.stage==='A'?"שלב א'":sk.stage==='B'?"שלב ב'":'שני השלבים'}</span></td><td>${Math.floor(x.lvl)}/5</td><td>${x.n?Math.round(x.c/x.n*100)+'%':'—'}</td><td>${x.n?Math.round(x.t/x.n)+' ש׳':'—'}</td><td>${x.n}</td><td><span class="st ${cls}">${lab}</span></td></tr>`}).join('');
+  const practiced=Object.keys(SKILLS).filter(k=>state.skills[k].n>=3&&focusWeight(k)>=1);
+  const avgDiff=practiced.length?practiced.reduce((a,k)=>a+state.skills[k].lvl-P.target,0)/practiced.length:0;
+  let rec;
+  if(!practiced.length)rec='עדיין אין מספיק נתונים. אחרי כמה משימות תופיע כאן הערכת קצב.';
+  else if(avgDiff< -.6)rec=`ההתקדמות איטית מהתוכנית${P.daysLeft?` ל-${P.daysLeft} הימים שנותרו`:''}. כדאי להעלות ל-${Math.min(45,s.minutes+10)} דקות ביום או להוסיף סיבוב בונוס. המשימות כבר מתמקדות אוטומטית בנושאים החלשים.`;
+  else if(avgDiff>.6)rec='ההתקדמות מהירה מהתוכנית. הקושי עולה אוטומטית. אפשר להוסיף "אתגר מבחן" עם שעון כדי לתרגל עבודה בלחץ זמן.';
+  else rec='ההתקדמות בקצב של התוכנית. כדאי לשמור על רצף יומי.';
+  const last=[...Array(14).keys()].map(i=>addDays(P.today,i-13));
+  const maxSec=Math.max(60,...last.map(k=>(state.days[k]||{}).sec||0));
+  const totQ=Object.values(state.days).reduce((a,d)=>a+d.q,0),totC=Object.values(state.days).reduce((a,d)=>a+d.c,0),totMin=Math.round(Object.values(state.days).reduce((a,d)=>a+d.sec,0)/60);
+  $('#s-parent').innerHTML=`<div class="wrap">
+    <div class="topbar"><button class="ibtn" id="back" aria-label="חזרה">→</button><h1 class="onbg" style="font-size:1.9rem">אזור הורים</h1></div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <h3>מצב התוכנית</h3>
+      <div class="stats"><div class="stat"><b>${P.daysLeft===null?'—':Math.max(0,P.daysLeft)}</b>ימים למבחן</div><div class="stat"><b>${totQ?Math.round(totC/totQ*100):0}%</b>דיוק כללי</div><div class="stat"><b>${totMin}</b>דקות תרגול</div></div>
+      <div class="note">${esc(rec)}</div>
+      <div><div class="muted" style="margin-bottom:6px">דקות תרגול ב-14 הימים האחרונים</div>
+      <div class="bars">${last.map(k=>{const sec=(state.days[k]||{}).sec||0;return `<div><span style="height:${Math.round(sec/maxSec*70)}px"></span>${dowOf(k)}</div>`}).join('')}</div></div>
+    </div>
+    <div class="card"><h3 style="margin-bottom:10px">התקדמות לפי נושא</h3><div class="tbl"><table><thead><tr><th>נושא</th><th>רמה</th><th>דיוק</th><th>זמן ממוצע</th><th>שאלות</th><th>מצב</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="muted" style="margin:10px 0 0;font-size:.95rem">רמת היעד להיום: ${P.target.toFixed(1)} מתוך 5. היעד עולה בהדרגה עד יום המבחן.</p></div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <h3>הגדרות</h3>
+      <div class="field"><label for="p-name">שם הילד או הילדה</label><input id="p-name" value="${esc(state.profile.name)}" maxlength="16"></div>
+      <div class="chips" id="p-g"><button class="chipbtn ${state.profile.gender==='f'?'sel':''}" data-v="f">בת</button><button class="chipbtn ${state.profile.gender==='m'?'sel':''}" data-v="m">בן</button></div>
+      <div class="field"><label for="p-date">תאריך המבחן</label><input type="date" id="p-date" value="${s.testDate}"></div>
+      <div class="field"><span>דקות ביום</span><div class="chips" id="p-min">${[10,15,20,30,45].map(m=>`<button class="chipbtn ${s.minutes===m?'sel':''}" data-v="${m}">${m}</button>`).join('')}</div></div>
+      <div class="field"><span>מיקוד</span><div class="chips" id="p-focus">${[['both','שני השלבים'],['A',"שלב א'"],['B',"שלב ב'"]].map(([v,t])=>`<button class="chipbtn ${s.focus===v?'sel':''}" data-v="${v}">${t}</button>`).join('')}</div></div>
+      <div class="field"><label for="p-voice">קול ההקראה</label><div class="row"><select id="p-voice" style="flex:1;min-width:0">${heVoices.length?heVoices.map(v=>`<option value="${esc(v.name)}" ${heVoice&&v.name===heVoice.name?'selected':''}>${esc(v.name)}</option>`).join(''):'<option value="">לא נמצא קול עברי במכשיר</option>'}</select><button class="btn ghost" id="p-test" type="button">🔊 בדיקה</button></div></div>
+      <div class="field"><span>מהירות ההקראה</span><div class="chips" id="p-rate">${[[.75,'איטית'],[.9,'רגילה'],[1,'מהירה']].map(([v,t])=>`<button class="chipbtn ${s.rate===v?'sel':''}" data-v="${v}">${t}</button>`).join('')}</div></div>
+      <div class="note" style="font-size:.95rem">איכות ההקראה תלויה בקולות שמותקנים במכשיר. באייפד אפשר להוריד קול עברי משופר: הגדרות ← נגישות ← תוכן מוקרא ← קולות ← עברית, ולבחור קול שמסומן "משופר" או "פרימיום". אחרי ההורדה, בחרו אותו כאן.</div>
+      <div class="field"><span>הקראה אוטומטית בכל שאלה (בדרך כלל עדיף כבוי, ההקראה זמינה בלחיצה על 🔊)</span><div class="chips" id="p-read"><button class="chipbtn ${s.autoRead?'sel':''}" data-v="1">פועל</button><button class="chipbtn ${!s.autoRead?'sel':''}" data-v="0">כבוי</button></div></div>
+      <div class="field"><span>צלילים</span><div class="chips" id="p-snd"><button class="chipbtn ${s.sound?'sel':''}" data-v="1">פועל</button><button class="chipbtn ${!s.sound?'sel':''}" data-v="0">כבוי</button></div></div>
+      <div class="row"><button class="btn" id="p-save">שמירה</button><button class="btn ghost" id="p-world">החלפת עולם ודמות</button></div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px"><h3>חשבון</h3>
+      ${cloudUser?`<div>מחובר: <b>${esc(cloudUser.name||'')}</b> <span class="muted">${esc(cloudUser.email||'')}</span></div><div class="muted">ההתקדמות נשמרת בחשבון ומסונכרנת בין מכשירים.</div><div><button class="btn ghost" id="acc-out">התנתקות</button></div>`
+      :CLOUD?`<div class="muted">משחקים בלי חשבון, וההתקדמות נשמרת רק במכשיר הזה. בהתחברות, ההתקדמות הנוכחית תעבור לחשבון.</div><div><button class="btn" id="acc-in" ${cloud?'':'disabled'}>התחברות עם Google</button></div>`
+      :'<div class="muted">ההתקדמות נשמרת במכשיר הזה.</div>'}</div>
+    <div class="card note" style="display:flex;flex-direction:column;gap:8px">
+      <h3>על התרגול</h3>
+      <div>בשלב א' יש בעיקר חשיבה מילולית וכמותית: אנלוגיות מילים, מילה שלא שייכת, הבנת הנקרא, חשיבה לוגית, בעיות מילוליות וסדרות מספרים.</div>
+      <div>בשלב ב' מתווספת חשיבה צורנית: סדרות צורות, מטריצות, אנלוגיות צורות, צורה יוצאת דופן ותמונת מראה.</div>
+      <div>כל נושא מתקדם ברמה משלו (1 עד 5). תשובה נכונה ומהירה מעלה את הרמה, טעות מורידה אותה מעט, ושאלות שנטעו בהן חוזרות בהמשך. ההתקדמות נשמרת במכשיר, ואם מתחברים עם Google היא נשמרת גם בחשבון ועוברת בין מכשירים.</div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>איפוס</h3><div class="muted">מוחק את כל ההתקדמות, הכוכבים והאוסף.</div><div id="reset-box"><button class="btn ghost" id="p-reset">איפוס התקדמות</button></div></div>
+  </div>`;
+  show('parent');$('#back').onclick=renderHome;
+  const chipGroup=(id,fn)=>document.querySelectorAll(`#${id} .chipbtn`).forEach(b=>b.onclick=()=>{document.querySelectorAll(`#${id} .chipbtn`).forEach(x=>x.classList.remove('sel'));b.classList.add('sel');fn(b.dataset.v)});
+  const tmp={gender:state.profile.gender,minutes:s.minutes,focus:s.focus,autoRead:s.autoRead,sound:s.sound,rate:s.rate||.9};
+  chipGroup('p-g',v=>tmp.gender=v);chipGroup('p-min',v=>tmp.minutes=+v);chipGroup('p-focus',v=>tmp.focus=v);chipGroup('p-read',v=>tmp.autoRead=v==='1');chipGroup('p-snd',v=>tmp.sound=v==='1');chipGroup('p-rate',v=>tmp.rate=+v);
+  const applyVoice=()=>{const vn=$('#p-voice').value;const v=heVoices.find(x=>x.name===vn);if(v)heVoice=v};
+  $('#p-test').onclick=()=>{applyVoice();const r=s.rate;s.rate=tmp.rate;speak(`שלום ${state.profile.name}! כך נשמעת ההקראה במשחק.`);s.rate=r};
+  $('#p-save').onclick=()=>{const n=$('#p-name').value.trim();if(n)state.profile.name=n;state.profile.gender=tmp.gender;Object.assign(s,{minutes:tmp.minutes,focus:tmp.focus,autoRead:tmp.autoRead,sound:tmp.sound,rate:tmp.rate,voice:$('#p-voice').value||s.voice,testDate:$('#p-date').value||''});applyVoice();save();toast('נשמר');renderParent()};
+  $('#p-world').onclick=()=>renderSetup(1);
+  const ao=$('#acc-out');if(ao)ao.onclick=async()=>{clearTimeout(syncT);if(cloudUser&&cloud)await cloud.save(cloudUser.uid,{json:JSON.stringify(state),t:state.t||Date.now()}).catch(()=>{});setLocalMode(false);await cloud.signOut()};
+  const ai=$('#acc-in');if(ai)ai.onclick=async()=>{ai.disabled=true;try{await cloud.signIn()}catch(e){toast('ההתחברות לא הצליחה');ai.disabled=false}};
+  $('#p-reset').onclick=()=>{$('#reset-box').innerHTML=`<div class="row"><span style="font-weight:600">בטוח? אי אפשר לבטל.</span><button class="btn" id="r-yes" style="background:var(--bad);color:#fff;box-shadow:0 6px 0 #8f2323">כן, לאפס</button><button class="btn ghost" id="r-no">ביטול</button></div>`;
+    $('#r-no').onclick=renderParent;$('#r-yes').onclick=()=>{const keep={profile:state.profile,settings:state.settings};state=newState();state.profile=keep.profile;state.settings=keep.settings;save();toast('ההתקדמות אופסה');renderHome()}};
+}
+
+/* ============ self-test hook (used for QA only) ============ */
+window.__selftest=function(){
+  const errs=[];const saved=JSON.stringify(state);
+  for(const k of Object.keys(GEN))for(let L=1;L<=5;L++)for(let r=0;r<120;r++){
+    try{const q=GEN[k](L);const n=q.opts.length;const keys=q.opts.map(o=>o.html);
+      if(q.ans<0||q.ans>=n)errs.push(`${k} L${L} bad ans`);
+      if(n<(k==='logic'&&L===1?2:3))errs.push(`${k} L${L} only ${n} opts`);
+      if(new Set(keys).size!==n)errs.push(`${k} L${L} duplicate opts`);
+      if(!q.explain)errs.push(`${k} L${L} no explain`);
+    }catch(e){errs.push(`${k} L${L} threw ${e&&e.message}`)}}
+  state=JSON.parse(saved);
+  return [...new Set(errs)];
+};
+
+/* ============ start ============ */
+if(CLOUD&&!localMode()){
+  state=migrate(loadLocal(LS));renderLoading();
+  setTimeout(()=>{if(!cloud&&current==='login')renderLogin(true)},10000);
+}else{
+  state=migrate(loadLocal(LS));boot();
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSpeak()});
+</script>
+
+<script type="module">
+const cfg=window.FIREBASE_CONFIG;
+if(cfg&&cfg.apiKey){
+  try{
+    const V='10.12.2',B=`https://www.gstatic.com/firebasejs/${V}/`;
+    const [{initializeApp},A,D]=await Promise.all([import(B+'firebase-app.js'),import(B+'firebase-auth.js'),import(B+'firebase-firestore.js')]);
+    const app=initializeApp(cfg),auth=A.getAuth(app),db=D.getFirestore(app);
+    try{await A.getRedirectResult(auth)}catch(e){}
+    const toUser=u=>u?{uid:u.uid,name:u.displayName||'',email:u.email||''}:null;
+    window.__cloudReady({
+      onUser:fn=>A.onAuthStateChanged(auth,u=>fn(toUser(u))),
+      signIn:async()=>{const p=new A.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
+        try{await A.signInWithPopup(auth,p)}catch(e){if(/popup-blocked|operation-not-supported|cancelled-popup/.test(e.code||''))await A.signInWithRedirect(auth,p);else if(!/popup-closed/.test(e.code||''))throw e}},
+      signOut:()=>A.signOut(auth),
+      load:async uid=>{const s=await D.getDoc(D.doc(db,'users',uid));return s.exists()?s.data():null},
+      save:(uid,data)=>D.setDoc(D.doc(db,'users',uid),data)
+    });
+  }catch(e){console.error(e);window.__cloudFail&&window.__cloudFail(e)}
+}
+</script>
+
+</body>
+</html>
