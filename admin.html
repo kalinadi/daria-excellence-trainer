@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>מסע החשיבה · ניהול</title>
+<link rel="icon" href="icon.svg">
+<style>
+:root{
+  color-scheme:light;
+  --page:#f9f9f7;--surface:#fcfcfb;--raise:#ffffff;
+  --ink:#0b0b0b;--ink2:#52514e;--muted:#898781;
+  --grid:#e1e0d9;--axis:#c3c2b7;--ring:rgba(11,11,11,.10);
+  --s1:#2a78d6;--s2:#eb6834;
+  --seq1:#cde2fb;--seq2:#9ec5f4;--seq3:#5598e7;--seq4:#256abf;--seq5:#104281;
+  --good:#0ca30c;--goodtx:#006300;--warn:#fab219;--serious:#ec835a;--crit:#d03b3b;
+  --wash:rgba(42,120,214,.08);
+  --f:system-ui,-apple-system,"Segoe UI","Arial Hebrew",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--page:#0d0d0d;--surface:#1a1a19;--raise:#222221;
+  --ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;--ring:rgba(255,255,255,.10);
+  --s1:#3987e5;--s2:#d95926;--seq1:#1f2a38;--seq2:#184f95;--seq3:#256abf;--seq4:#3987e5;--seq5:#86b6ef;--goodtx:#0ca30c;--wash:rgba(57,135,229,.12)}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--page:#0d0d0d;--surface:#1a1a19;--raise:#222221;
+  --ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;--ring:rgba(255,255,255,.10);
+  --s1:#3987e5;--s2:#d95926;--seq1:#1f2a38;--seq2:#184f95;--seq3:#256abf;--seq4:#3987e5;--seq5:#86b6ef;--goodtx:#0ca30c;--wash:rgba(57,135,229,.12)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink);font-family:var(--f);font-size:15px;line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1280px;margin:0 auto;padding:20px 16px 60px}
+header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+header.top h1{font-size:1.35rem;margin:0;font-weight:700;letter-spacing:-.01em}
+header.top .sub{color:var(--muted);font-size:.9rem}
+.sp{flex:1}
+.btn{border:1px solid var(--ring);background:var(--raise);border-radius:8px;padding:7px 12px;cursor:pointer}
+.btn:hover{background:var(--wash)}
+.btn.pri{background:var(--s1);color:#fff;border-color:transparent}
+.who{display:flex;align-items:center;gap:8px;color:var(--ink2);font-size:.9rem}
+.who img{width:26px;height:26px;border-radius:50%}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.seg{display:inline-flex;border:1px solid var(--ring);border-radius:8px;overflow:hidden;background:var(--raise)}
+.seg button{border:0;background:none;padding:6px 12px;cursor:pointer;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--wash);color:var(--ink);font-weight:600}
+input.search{border:1px solid var(--ring);background:var(--raise);border-radius:8px;padding:6px 10px;min-width:200px}
+.banner{border:1px solid var(--ring);background:var(--raise);border-radius:10px;padding:12px 14px;margin-bottom:16px;color:var(--ink2)}
+.banner b{color:var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--ring);border-radius:12px;padding:12px 14px}
+.kpi .l{color:var(--ink2);font-size:.85rem}
+.kpi .v{font-size:1.75rem;font-weight:700;margin-top:2px;letter-spacing:-.02em}
+.kpi .d{color:var(--muted);font-size:.8rem;margin-top:2px}
+.grid2{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px}
+.grid2b{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media (max-width:900px){.grid2,.grid2b{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--ring);border-radius:12px;padding:14px 16px;min-width:0}
+.card h2{font-size:1rem;margin:0 0 2px;font-weight:650}
+.card .cap{color:var(--muted);font-size:.82rem;margin-bottom:10px}
+.card .hd{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+svg text{font-family:var(--f)}
+.chart{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--raise);border:1px solid var(--ring);border-radius:8px;padding:6px 9px;font-size:.82rem;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap;z-index:5;display:none}
+.tip b{font-variant-numeric:tabular-nums}
+.hb{display:grid;grid-template-columns:minmax(92px,auto) 1fr auto;gap:6px 10px;align-items:center;font-size:.88rem}
+.hb .t{height:12px;background:var(--grid);border-radius:4px;position:relative;overflow:hidden}
+.hb .t i{position:absolute;inset-block:0;inset-inline-start:0;background:var(--s1);border-radius:4px}
+.hb .n{font-variant-numeric:tabular-nums;color:var(--ink2);text-align:left;min-width:64px}
+.hb .k{color:var(--ink)}
+.status{display:inline-flex;align-items:center;gap:5px;font-size:.82rem;white-space:nowrap}
+.status:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.tablewrap{overflow-x:auto;margin:0 -16px;padding:0 16px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:right;padding:8px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}
+th{color:var(--ink2);font-weight:600;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--surface)}
+th[data-dir]:after{content:attr(data-dir);color:var(--muted);margin-inline-start:4px}
+td.num{font-variant-numeric:tabular-nums}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--wash)}
+.uname{display:flex;align-items:center;gap:8px}
+.uname .av{width:30px;height:30px;border-radius:50%;background:var(--grid);display:grid;place-items:center;font-size:1.1rem;flex:none}
+.uname small{display:block;color:var(--muted);font-size:.78rem}
+.spark{display:inline-flex;gap:2px;vertical-align:middle}
+.spark i{width:6px;height:16px;border-radius:2px;background:var(--grid)}
+.muted{color:var(--muted)}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:20}
+.drawer{position:fixed;inset-block:0;inset-inline-start:0;width:min(560px,100%);background:var(--page);z-index:21;overflow-y:auto;transform:translateX(100%);transition:transform .22s ease;box-shadow:0 0 30px rgba(0,0,0,.2)}
+.drawer.open{transform:none}.scrim.open{display:block}
+.drawer .in{padding:18px 16px 40px;display:flex;flex-direction:column;gap:12px}
+.dh{display:flex;gap:12px;align-items:center}
+.dh .av{width:52px;height:52px;border-radius:50%;background:var(--grid);display:grid;place-items:center;font-size:2rem}
+.dh h3{margin:0;font-size:1.2rem}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mini .kpi .v{font-size:1.3rem}
+.cal{display:grid;grid-template-columns:repeat(15,1fr);gap:3px}
+.cal i{aspect-ratio:1;border-radius:3px;background:var(--grid);position:relative}
+.cal i.lg{outline:1.5px solid var(--s2);outline-offset:-1.5px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--ink2);font-size:.8rem;margin-top:8px;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.sess{font-size:.86rem}
+.sess div{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--grid)}
+.sess div span:first-child{color:var(--muted);min-width:72px;font-variant-numeric:tabular-nums}
+.login{max-width:420px;margin:12vh auto;text-align:center}
+.login .card{padding:28px}
+.err{color:var(--crit)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="empty">טוען…</div></div>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true"><div class="in" id="dbody"></div></aside>
+
+<script src="firebase-config.js?v=2"></script>
+<script>
+/* ===== constants mirrored from the game (index.html) ===== */
+const SKILLS={analogy:['אנלוגיות מילים','A'],oddword:['מילה לא שייכת','A'],reading:['הבנת הנקרא','A'],logic:['חשיבה לוגית','A'],wordprob:['בעיות מילוליות','A'],symbols:['משוואות וסמלים','A'],facts:['חשבון מהיר','A'],series:['סדרות מספרים','AB'],shapeseries:['סדרות צורות','B'],matrix:['מטריצות','B'],shapeanalogy:['אנלוגיות צורות','B'],oddshape:['צורה יוצאת דופן','B'],mirror:['תמונת מראה','B']};
+const WORLDS={space:'מסע בחלל',animals:'ספארי בטבע',magic:'ממלכת הקסם',ocean:'מתחת לים'};
+const KIND={daily:'משימה יומית',bonus:'בונוס',exam:'מבחן',practice:'תרגול',review:'חזרה',mist:'מחברת טעויות'};
+const DEV={tablet:'טאבלט',phone:'טלפון',desktop:'מחשב'};
+const DEMO=/[?&]demo=1/.test(location.search);
+
+/* ===== helpers ===== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const dkey=(d=new Date())=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseKey=k=>{const[y,m,d]=k.split('-').map(Number);return Date.UTC(y,m-1,d)};
+const addDays=(k,n)=>{const t=new Date(parseKey(k)+n*864e5);return `${t.getUTCFullYear()}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())}`};
+const daysBetween=(a,b)=>Math.round((parseKey(b)-parseKey(a))/864e5);
+const fmt=n=>Math.round(n).toLocaleString('he-IL');
+const pct=(c,n)=>n?Math.round(c/n*100):null;
+const mins=sec=>Math.round(sec/60);
+const hm=sec=>{const m=Math.round(sec/60);return m<60?`${m} ד׳`:`${Math.floor(m/60)} ש׳ ${m%60} ד׳`};
+const shortDate=k=>{if(!k)return '—';const[y,m,d]=k.split('-');return `${+d}.${+m}`};
+const tsKey=t=>{if(!t)return null;const d=t.toDate?t.toDate():new Date(t.seconds?t.seconds*1000:t);return isNaN(d)?null:dkey(d)};
+const tsDate=t=>{if(!t)return null;const d=t.toDate?t.toDate():new Date(t.seconds?t.seconds*1000:t);return isNaN(d)?null:d};
+const TODAY=dkey();
+const ago=k=>{if(!k)return '—';const n=daysBetween(k,TODAY);return n<=0?'היום':n===1?'אתמול':`לפני ${n} ימים`};
+
+/* ===== turn a Firestore doc into a user record ===== */
+function toUser(id,doc){
+  let s={};try{s=doc.json?JSON.parse(doc.json):{}}catch(e){}
+  const days=s.days||{},skills=s.skills||{};
+  const actDays=Object.keys(days).filter(k=>(days[k].q||0)>0).sort();
+  const loginDays=(doc.loginDays||[]).slice().sort();
+  let q=0,c=0,lvlSum=0,lvlN=0;
+  const sk={};
+  for(const k in SKILLS){const x=skills[k]||{};sk[k]={n:x.n||0,c:x.c||0,t:x.t||0,lvl:x.lvl||1.5,h:x.h||[]};q+=sk[k].n;c+=sk[k].c;if(sk[k].n){lvlSum+=sk[k].lvl;lvlN++}}
+  const sec=Object.values(days).reduce((a,d)=>a+(d.sec||0),0);
+  const missions=Object.values(days).reduce((a,d)=>a+(d.missions||0),0);
+  const lastSeenK=tsKey(doc.lastSeen)||(s.t?dkey(new Date(s.t)):null);
+  const lastAct=[actDays[actDays.length-1],lastSeenK,loginDays[loginDays.length-1]].filter(Boolean).sort().pop()||null;
+  const firstK=tsKey(doc.firstLogin)||[s.startDate,actDays[0],loginDays[0]].filter(Boolean).sort()[0]||null;
+  const streakAlive=s.streak&&s.streak.last&&daysBetween(s.streak.last,TODAY)<=1;
+  const facts=s.facts||{};const weakFacts=Object.keys(facts).filter(f=>{const x=facts[f];return x.n>=2&&(x.c/x.n<.8||x.t/x.n>6)}).length;
+  const p=s.profile||{},st=s.settings||{};
+  return {id,email:doc.email||'',gname:doc.gname||'',photo:doc.photo||'',
+    child:p.name||'',gender:p.gender||'',world:p.world||'',char:p.char||'',
+    first:firstK,last:lastAct,lastSeen:tsDate(doc.lastSeen)||(s.t?new Date(s.t):null),
+    logins:doc.logins||0,loginDays,devices:doc.devices||[],lastDevice:doc.lastDevice||'',
+    days,actDays,q,c,acc:pct(c,q),sec,missions,stars:s.stars||0,
+    streak:streakAlive?(s.streak.count||0):0,bestStreak:s.streak?s.streak.count||0:0,
+    lvl:lvlN?lvlSum/lvlN:null,skills:sk,sessions:(s.sessions||[]).slice(),
+    mistOpen:(s.mist||[]).length,mistDone:s.mistDone||0,weakFacts,
+    testDate:st.testDate||'',minutes:st.minutes||0,focus:st.focus||'',collection:(s.collection||[]).length,
+    tracked:!!doc.email};
+}
+function statusOf(u){
+  if(!u.last)return {k:'new',l:'טרם שיחק',c:'var(--muted)'};
+  const n=daysBetween(u.last,TODAY);
+  if(n<=2)return {k:'active',l:'פעיל',c:'var(--good)'};
+  if(n<=7)return {k:'risk',l:'נחלש',c:'var(--warn)'};
+  return {k:'dormant',l:'לא פעיל',c:'var(--crit)'};
+}
+
+/* ===== demo data (admin.html?demo=1) ===== */
+function demoDocs(){
+  const names=[['נועה','f','space','👩‍🚀'],['איתי','m','animals','🦊'],['מאיה','f','magic','🧚'],['יונתן','m','ocean','🐬'],['תמר','f','animals','🐼'],['אורי','m','space','🤖'],['שירה','f','ocean','🧜‍♀️'],['עידו','m','magic','🐉'],['ליה','f','space','👽'],['רועי','m','animals','🐶'],['הילה','f','magic','🧙‍♀️'],['אדם','m','ocean','🐙'],['דריה','f','space','👩‍🚀'],['גיל','m','animals','🐱']];
+  let seed=7;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  return names.map(([name,g,w,ch],i)=>{
+    const span=10+Math.floor(r()*60),eng=r(),fade=r()<.3?Math.floor(r()*14)+3:0;
+    const days={},skills={},sessions=[],loginDays=[];let stars=0;
+    Object.keys(SKILLS).forEach(k=>skills[k]={lvl:1.5,n:0,c:0,t:0,h:[]});
+    const ab=.5+r()*.3;
+    for(let d=span;d>=fade;d--){if(r()>eng*.9+.05)continue;const k=addDays(TODAY,-d);loginDays.push(k);
+      const qn=8+Math.floor(r()*18);let cc=0,sec=0;
+      for(let j=0;j<qn;j++){const kk=Object.keys(SKILLS)[Math.floor(r()*13)];const ok=r()<ab-(kk==='matrix'||kk==='mirror'?.15:0)+Math.min(.15,skills[kk].n/300);const t=8+r()*40;
+        const x=skills[kk];x.n++;x.t+=t;x.h=x.h.concat(ok?1:0).slice(-20);if(ok){x.c++;cc++;x.lvl=Math.min(5.9,x.lvl+.3)}else x.lvl=Math.max(1,x.lvl-.4);sec+=t+5}
+      days[k]={q:qn,c:cc,sec,missions:r()<.85?1:0};stars+=cc;sessions.push({d:k,kind:r()<.75?'daily':(r()<.5?'exam':'bonus'),q:qn,c:cc,sec:Math.round(sec),done:r()<.9})}
+    const keys=Object.keys(days).sort();let streak={last:'',count:0};keys.forEach(k=>{streak={last:k,count:streak.last===addDays(k,-1)?streak.count+1:1}});
+    const s={profile:{name,gender:g,world:w,char:ch},settings:{testDate:r()<.6?addDays(TODAY,20+Math.floor(r()*90)):'',minutes:[10,15,20][i%3],focus:'both'},
+      startDate:addDays(TODAY,-span),skills,stars,collection:new Array(Math.floor(stars/40)).fill(0),days,streak,sessions:sessions.slice(-80),mist:new Array(Math.floor(r()*15)).fill({}),mistDone:Math.floor(r()*30),
+      facts:{'7+8':{n:6,c:4,t:50},'6×7':{n:5,c:5,t:20}},t:keys.length?parseKey(keys[keys.length-1])+36e6:Date.now()};
+    const uid='demo'+i;const parent=['רונית','אבי','מיכל','דני','שרון','יעל','עמית','אורנה','רז','קרן','אלון','ליאת','עדי','נגה'][i];
+    return {id:uid,data:{json:JSON.stringify(s),t:s.t,email:`${['ronit','avi','michal','dani','sharon','yael','amit','orna','raz','keren','alon','liat','adi','noga'][i]}@example.com`,gname:parent+' (דמו)',
+      logins:loginDays.length+Math.floor(r()*8),loginDays,devices:[i%3?'tablet':'phone'],lastDevice:i%3?'tablet':'phone',
+      firstLogin:{seconds:parseKey(addDays(TODAY,-span))/1000},lastSeen:keys.length?{seconds:s.t/1000}:null}};
+  });
+}
+
+/* ===== state ===== */
+let USERS=[],RANGE=30,METRIC='users',SORT={k:'last',d:-1},QUERY='',FILTER='all',ME=null,API=null;
+
+/* ===== rendering ===== */
+function shell(){
+  const meHtml=ME?`<span class="who">${ME.photo?`<img src="${esc(ME.photo)}" alt="" referrerpolicy="no-referrer">`:''}${esc(ME.email)}</span>`:'';
+  $('#app').innerHTML=`
+  <header class="top">
+    <div><h1>מסע החשיבה · לוח ניהול</h1><div class="sub" id="stamp"></div></div>
+    <div class="sp"></div>${meHtml}
+    <button class="btn" id="b-ref">רענון</button>
+    <button class="btn" id="b-csv">ייצוא CSV</button>
+    ${ME&&!DEMO?'<button class="btn" id="b-out">התנתקות</button>':''}
+  </header>
+  ${DEMO?'<div class="banner"><b>מצב הדגמה.</b> הנתונים כאן בדויים, כדי לראות איך הלוח נראה. בלי <code>?demo=1</code> בכתובת הלוח מציג את המשתמשים האמיתיים.</div>':''}
+  <div id="untracked"></div>
+  <div class="bar">
+    <div class="seg" id="range">${[[7,'7 ימים'],[30,'30 ימים'],[90,'90 ימים'],[0,'הכול']].map(([v,l])=>`<button data-v="${v}" aria-pressed="${v===RANGE}">${l}</button>`).join('')}</div>
+  </div>
+  <section class="kpis" id="kpis"></section>
+  <div class="grid2">
+    <div class="card"><div class="hd"><div><h2 id="ttl-act"></h2><div class="cap" id="cap-act"></div></div><div class="sp"></div>
+      <div class="seg" id="metric">${[['users','משתמשים פעילים'],['q','שאלות'],['min','דקות']].map(([v,l])=>`<button data-v="${v}" aria-pressed="${v===METRIC}">${l}</button>`).join('')}</div></div>
+      <div class="chart" id="ch-act"></div></div>
+    <div class="card"><h2>מצב המשתמשים</h2><div class="cap">לפי הפעילות האחרונה</div><div id="ch-status"></div>
+      <h2 style="margin-top:18px">מכשירים</h2><div class="cap">המכשיר האחרון שממנו נכנסו</div><div id="ch-dev"></div></div>
+  </div>
+  <div class="grid2b">
+    <div class="card"><h2>רמה ממוצעת לפי נושא</h2><div class="cap">רמה 1–5, ממוצע בין המשתמשים שענו בנושא · משמאל: אחוז הצלחה</div><div id="ch-lvl"></div></div>
+    <div class="card"><h2>היכן מתקשים</h2><div class="cap">אחוז הצלחה ב-20 התשובות האחרונות בכל נושא, מהנמוך לגבוה</div><div id="ch-hard"></div></div>
+  </div>
+  <div class="card">
+    <div class="hd"><div><h2>כל המשתמשים</h2><div class="cap" id="cap-tbl"></div></div><div class="sp"></div>
+      <div class="seg" id="filt">${[['all','הכול'],['active','פעילים'],['risk','נחלשים'],['dormant','לא פעילים']].map(([v,l])=>`<button data-v="${v}" aria-pressed="${v===FILTER}">${l}</button>`).join('')}</div>
+      <input class="search" id="q" placeholder="חיפוש לפי שם או מייל" value="${esc(QUERY)}"></div>
+    <div class="tablewrap"><table id="tbl"></table></div>
+  </div>`;
+  $('#b-ref').onclick=()=>load();
+  $('#b-csv').onclick=csv;
+  const bo=$('#b-out');if(bo)bo.onclick=()=>API.signOut();
+  segs('#range',v=>{RANGE=+v;draw()});
+  segs('#metric',v=>{METRIC=v;drawActivity()});
+  segs('#filt',v=>{FILTER=v;drawTable()});
+  $('#q').oninput=e=>{QUERY=e.target.value.trim();drawTable()};
+}
+function segs(sel,fn){document.querySelectorAll(sel+' button').forEach(b=>b.onclick=()=>{document.querySelectorAll(sel+' button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.v)})}
+
+function rangeKeys(){
+  let n=RANGE;
+  if(!n){const first=USERS.map(u=>u.first).filter(Boolean).sort()[0]||addDays(TODAY,-29);n=Math.max(7,daysBetween(first,TODAY)+1)}
+  return Array.from({length:n},(_,i)=>addDays(TODAY,i-n+1));
+}
+function draw(){
+  $('#stamp').textContent=`${USERS.length} משתמשים · עודכן ${new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})}`;
+  const un=USERS.filter(u=>!u.tracked).length;
+  $('#untracked').innerHTML=un&&!DEMO?`<div class="banner">ל-${un} משתמשים עוד אין מייל ונתוני כניסות, כי הם לא נכנסו מאז שנוספה המדידה. ההתקדמות שלהם מוצגת במלואה, והפרטים יתמלאו בכניסה הבאה שלהם.</div>`:'';
+  drawKpis();drawActivity();drawStatus();drawSkills();drawTable();
+}
+
+function drawKpis(){
+  const keys=rangeKeys(),from=keys[0];
+  const inR=k=>k>=from&&k<=TODAY;
+  const act=new Set(),act7=new Set();let q=0,c=0,sec=0,miss=0;
+  USERS.forEach(u=>{
+    const d=new Set([...u.actDays,...u.loginDays]);
+    d.forEach(k=>{if(inR(k))act.add(u.id);if(daysBetween(k,TODAY)<7&&k<=TODAY)act7.add(u.id)});
+    for(const k in u.days)if(inR(k)){const x=u.days[k];q+=x.q||0;c+=x.c||0;sec+=x.sec||0;miss+=x.missions||0}
+  });
+  const today=USERS.filter(u=>u.actDays.includes(TODAY)||u.loginDays.includes(TODAY)).length;
+  const newU=USERS.filter(u=>u.first&&inR(u.first)).length;
+  const rl=RANGE?`ב-${RANGE} הימים האחרונים`:'מאז ההתחלה';
+  const tiles=[
+    ['משתמשים רשומים',fmt(USERS.length),newU?`${fmt(newU)} חדשים ${rl}`:`אין חדשים ${rl}`],
+    ['פעילים היום',fmt(today),`${fmt(act7.size)} פעילים השבוע`],
+    ['פעילים בטווח',fmt(act.size),USERS.length?`${pct(act.size,USERS.length)}% מכלל המשתמשים`:''],
+    ['שאלות שנענו',fmt(q),rl],
+    ['אחוז הצלחה',q?pct(c,q)+'%':'—',`${fmt(c)} תשובות נכונות`],
+    ['זמן משחק',hm(sec),act.size?`${hm(sec/act.size)} בממוצע למשתמש פעיל`:''],
+    ['משימות יומיות שהושלמו',fmt(miss),rl],
+  ];
+  $('#kpis').innerHTML=tiles.map(([l,v,d])=>`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join('');
+}
+
+function drawActivity(){
+  const keys=rangeKeys();
+  const vals=keys.map(k=>{
+    if(METRIC==='users')return USERS.filter(u=>(u.days[k]&&u.days[k].q>0)||u.loginDays.includes(k)).length;
+    let s=0;USERS.forEach(u=>{const d=u.days[k];if(d)s+=METRIC==='q'?(d.q||0):(d.sec||0)/60});return Math.round(s);
+  });
+  const L={users:'משתמשים פעילים ביום',q:'שאלות שנענו ביום',min:'דקות משחק ביום'}[METRIC];
+  const unit={users:'משתמשים',q:'שאלות',min:'דקות'}[METRIC];
+  $('#ttl-act').textContent=L;
+  const tot=vals.reduce((a,b)=>a+b,0);
+  $('#cap-act').textContent=METRIC==='users'?`ממוצע ${(tot/keys.length).toFixed(1)} ביום`:`סה״כ ${fmt(tot)} ${unit} בטווח`;
+  barChart($('#ch-act'),keys,vals,unit);
+}
+function niceMax(m){if(m<=4)return 4;if(m<=40)return Math.ceil(m/4)*4;const p=Math.pow(10,Math.floor(Math.log10(m))),f=m/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function barChart(el,keys,vals,unit){
+  const W=Math.max(320,el.clientWidth||700),H=230,pl=10,pr=40,pt=10,pb=26;
+  const max=niceMax(Math.max(1,...vals)),n=keys.length,iw=W-pl-pr,ih=H-pt-pb,slot=iw/n,bw=Math.max(2,Math.min(28,slot-2));
+  // RTL reading: oldest on the right, today on the left
+  const x=i=>pl+iw-(i+1)*slot+(slot-bw)/2;
+  const y=v=>pt+ih-(v/max)*ih;
+  let g='';
+  for(let t=0;t<=4;t++){const v=max*t/4,yy=y(v);g+=`<line x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}" stroke="${t?'var(--grid)':'var(--axis)'}" stroke-width="1"/><text x="${W-pr+6}" y="${yy+4}" font-size="11" fill="var(--muted)" text-anchor="start" style="font-variant-numeric:tabular-nums">${fmt(v)}</text>`}
+  const step=Math.ceil(n/8);
+  let bars='',labels='';
+  vals.forEach((v,i)=>{
+    const h=Math.max(v?2:0,ih*v/max),yy=pt+ih-h,r=Math.min(4,bw/2,h);
+    if(v)bars+=`<path d="M${x(i)},${pt+ih} V${yy+r} Q${x(i)},${yy} ${x(i)+r},${yy} H${x(i)+bw-r} Q${x(i)+bw},${yy} ${x(i)+bw},${yy+r} V${pt+ih} Z" fill="var(--s1)"/>`;
+    if((n-1-i)%step===0)labels+=`<text x="${x(i)+bw/2}" y="${H-8}" font-size="11" fill="var(--muted)" text-anchor="middle">${shortDate(keys[i])}</text>`;
+    bars+=`<rect x="${pl+iw-(i+1)*slot}" y="${pt}" width="${slot}" height="${ih}" fill="transparent" data-i="${i}"/>`;
+  });
+  el.innerHTML=`<svg width="100%" viewBox="0 0 ${W} ${H}" role="img" aria-label="${unit} לפי יום">${g}${bars}${labels}</svg><div class="tip"></div>`;
+  const tip=el.querySelector('.tip');
+  el.querySelectorAll('rect[data-i]').forEach(r=>{
+    r.onmouseenter=()=>{const i=+r.dataset.i;const k=keys[i];r.setAttribute('fill','var(--wash)');
+      tip.innerHTML=`${shortDate(k)} · יום ${'אבגדהוש'[new Date(parseKey(k)).getUTCDay()]}׳<br><b>${fmt(vals[i])}</b> ${unit}`;tip.style.display='block';
+      const bx=(+r.getAttribute('x')+slot/2)/W*el.clientWidth;tip.style.left=Math.min(el.clientWidth-tip.offsetWidth,Math.max(0,bx-tip.offsetWidth/2))+'px';tip.style.top='0px'};
+    r.onmouseleave=()=>{r.setAttribute('fill','transparent');tip.style.display='none'};
+  });
+}
+function hbars(el,rows,max,fmtN,color){
+  if(!rows.length){el.innerHTML='<div class="muted">אין עדיין נתונים</div>';return}
+  el.innerHTML=`<div class="hb">${rows.map(r=>`<span class="k">${r.label}</span><span class="t" title="${esc(r.title||'')}"><i style="width:${Math.max(r.v?2:0,r.v/max*100)}%;background:${r.color||color||'var(--s1)'}"></i></span><span class="n">${fmtN(r)}</span>`).join('')}</div>`;
+}
+function drawStatus(){
+  const groups={active:{l:'פעיל (עד יומיים)',c:'var(--good)',n:0},risk:{l:'נחלש (3–7 ימים)',c:'var(--warn)',n:0},dormant:{l:'לא פעיל (מעל שבוע)',c:'var(--crit)',n:0},new:{l:'טרם שיחק',c:'var(--muted)',n:0}};
+  USERS.forEach(u=>groups[statusOf(u).k].n++);
+  const rows=Object.values(groups).map(g=>({label:`<span class="status" style="--c:${g.c}">${g.l}</span>`,v:g.n,color:g.c}));
+  hbars($('#ch-status'),rows,Math.max(1,USERS.length),r=>`${r.v}`,null);
+  const dv={};USERS.forEach(u=>{const k=u.lastDevice||'unknown';dv[k]=(dv[k]||0)+1});
+  hbars($('#ch-dev'),Object.entries(dv).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({label:DEV[k]||'לא ידוע',v})),Math.max(1,USERS.length),r=>`${r.v}`);
+}
+function drawSkills(){
+  const rows=[],hard=[];
+  for(const k in SKILLS){
+    const us=USERS.filter(u=>u.skills[k].n>0);if(!us.length)continue;
+    const lvl=us.reduce((a,u)=>a+u.skills[k].lvl,0)/us.length;
+    const n=us.reduce((a,u)=>a+u.skills[k].n,0),c=us.reduce((a,u)=>a+u.skills[k].c,0);
+    const h=us.flatMap(u=>u.skills[k].h);const rec=h.length?h.filter(Boolean).length/h.length:null;
+    rows.push({label:SKILLS[k][0],v:lvl-1,lvl,acc:pct(c,n),title:`${us.length} משתמשים · ${n} שאלות`});
+    if(rec!==null)hard.push({label:SKILLS[k][0],v:rec*100,n:h.length,title:`${us.length} משתמשים`});
+  }
+  rows.sort((a,b)=>b.lvl-a.lvl);hard.sort((a,b)=>a.v-b.v);
+  hbars($('#ch-lvl'),rows,4,r=>`${r.lvl.toFixed(1)} · ${r.acc}%`);
+  hbars($('#ch-hard'),hard,100,r=>`${Math.round(r.v)}%`,'var(--s2)');
+}
+
+const COLS=[
+  ['child','משתמש',u=>(u.child||u.gname||'').toLowerCase()],
+  ['status','מצב',u=>({active:0,risk:1,dormant:2,new:3})[statusOf(u).k]],
+  ['last','פעילות אחרונה',u=>u.last||''],
+  ['spark','14 ימים',u=>u.actDays.filter(k=>daysBetween(k,TODAY)<14).length],
+  ['first','הצטרפות',u=>u.first||''],
+  ['logins','כניסות',u=>u.logins],
+  ['act','ימי פעילות',u=>u.actDays.length],
+  ['streak','רצף',u=>u.streak],
+  ['q','שאלות',u=>u.q],
+  ['acc','הצלחה',u=>u.acc??-1],
+  ['lvl','רמה',u=>u.lvl??0],
+  ['sec','זמן',u=>u.sec],
+  ['stars','כוכבים',u=>u.stars],
+  ['mist','טעויות פתוחות',u=>u.mistOpen],
+  ['test','מבחן',u=>u.testDate||'9999'],
+];
+function drawTable(){
+  const q=QUERY.toLowerCase();
+  let list=USERS.filter(u=>(FILTER==='all'||statusOf(u).k===FILTER)&&(!q||[u.child,u.gname,u.email].some(s=>s.toLowerCase().includes(q))));
+  const col=COLS.find(c=>c[0]===SORT.k);
+  list.sort((a,b)=>{const x=col[2](a),y=col[2](b);return (x>y?1:x<y?-1:0)*SORT.d});
+  $('#cap-tbl').textContent=`${list.length} מתוך ${USERS.length} · לחיצה על שורה פותחת את פרטי המשתמש`;
+  const sparkKeys=Array.from({length:14},(_,i)=>addDays(TODAY,-i));
+  const seq=q=>q>=25?'var(--seq5)':q>=15?'var(--seq4)':q>=8?'var(--seq3)':'var(--seq2)';
+  $('#tbl').innerHTML=`<thead><tr>${COLS.map(c=>`<th data-k="${c[0]}" ${SORT.k===c[0]?`data-dir="${SORT.d>0?'▲':'▼'}"`:''}>${c[1]}</th>`).join('')}</tr></thead>
+  <tbody>${list.length?list.map(u=>{const st=statusOf(u);
+    const dt=u.testDate?daysBetween(TODAY,u.testDate):null;
+    return `<tr data-id="${esc(u.id)}">
+    <td><div class="uname"><span class="av">${esc(u.char||'🙂')}</span><span>${esc(u.child||'(בלי שם)')}<small>${esc(u.email||u.gname||'אין עדיין פרטי חשבון')}</small></span></div></td>
+    <td><span class="status" style="--c:${st.c}">${st.l}</span></td>
+    <td>${ago(u.last)}</td>
+    <td><span class="spark" aria-label="ימי פעילות ב-14 הימים האחרונים">${sparkKeys.map(k=>{const d=u.days[k];return `<i style="${d&&d.q?`background:${seq(d.q)}`:''}" title="${shortDate(k)}: ${d?d.q:0} שאלות"></i>`}).join('')}</span></td>
+    <td>${shortDate(u.first)}</td>
+    <td class="num">${u.tracked?fmt(u.logins):'—'}</td>
+    <td class="num">${fmt(u.actDays.length)}</td>
+    <td class="num">${u.streak?'🔥 '+u.streak:'0'}</td>
+    <td class="num">${fmt(u.q)}</td>
+    <td class="num">${u.acc==null?'—':u.acc+'%'}</td>
+    <td class="num">${u.lvl==null?'—':u.lvl.toFixed(1)}</td>
+    <td class="num">${hm(u.sec)}</td>
+    <td class="num">${fmt(u.stars)}</td>
+    <td class="num">${u.mistOpen}</td>
+    <td>${dt==null?'<span class="muted">—</span>':dt<0?'<span class="muted">עבר</span>':`בעוד ${dt} ימים`}</td></tr>`}).join(''):`<tr><td colspan="${COLS.length}" class="empty">אין משתמשים שמתאימים לסינון</td></tr>`}</tbody>`;
+  document.querySelectorAll('#tbl th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:k==='child'||k==='status'||k==='test'?1:-1};drawTable()});
+  document.querySelectorAll('#tbl tbody tr[data-id]').forEach(tr=>tr.onclick=()=>openUser(tr.dataset.id));
+}
+
+function openUser(id){
+  const u=USERS.find(x=>x.id===id);if(!u)return;
+  const st=statusOf(u);
+  const keys=Array.from({length:30},(_,i)=>addDays(TODAY,i-29));
+  const seq=q=>!q?'':q>=25?'var(--seq5)':q>=15?'var(--seq4)':q>=8?'var(--seq3)':'var(--seq2)';
+  const skRows=Object.keys(SKILLS).filter(k=>u.skills[k].n).map(k=>{const x=u.skills[k];return {label:SKILLS[k][0],v:x.lvl-1,lvl:x.lvl,acc:pct(x.c,x.n),n:x.n}}).sort((a,b)=>a.lvl-b.lvl);
+  const ses=u.sessions.slice(-12).reverse();
+  const dt=u.testDate?daysBetween(TODAY,u.testDate):null;
+  $('#dbody').innerHTML=`
+    <div class="dh"><span class="av">${esc(u.char||'🙂')}</span><div style="flex:1"><h3>${esc(u.child||'(בלי שם)')}</h3>
+      <div class="muted" style="font-size:.88rem">${esc(u.gname)}${u.email?' · '+esc(u.email):''}</div>
+      <div style="margin-top:4px"><span class="status" style="--c:${st.c}">${st.l}</span> <span class="muted" style="font-size:.85rem">· ${WORLDS[u.world]||'בלי עולם'} · ${u.gender==='m'?'בן':u.gender==='f'?'בת':''}</span></div></div>
+      <button class="btn" id="d-x" aria-label="סגירה">✕</button></div>
+    <div class="mini">
+      <div class="kpi"><div class="l">שאלות</div><div class="v">${fmt(u.q)}</div><div class="d">${u.acc==null?'':u.acc+'% הצלחה'}</div></div>
+      <div class="kpi"><div class="l">ימי פעילות</div><div class="v">${u.actDays.length}</div><div class="d">${u.tracked?fmt(u.logins)+' כניסות':'כניסות: עוד לא נמדד'}</div></div>
+      <div class="kpi"><div class="l">זמן משחק</div><div class="v">${hm(u.sec)}</div><div class="d">${u.actDays.length?hm(u.sec/u.actDays.length)+' ליום פעילות':''}</div></div>
+      <div class="kpi"><div class="l">רצף נוכחי</div><div class="v">${u.streak}</div><div class="d">${u.missions} משימות יומיות</div></div>
+      <div class="kpi"><div class="l">מחברת טעויות</div><div class="v">${u.mistOpen}</div><div class="d">${u.mistDone} תוקנו</div></div>
+      <div class="kpi"><div class="l">מבחן</div><div class="v" style="font-size:1.05rem;margin-top:6px">${dt==null?'לא הוגדר':dt<0?'עבר':'בעוד '+dt+' ימים'}</div><div class="d">${u.minutes?u.minutes+' דק׳ ביום':''}</div></div>
+    </div>
+    <div class="card"><h2>30 הימים האחרונים</h2><div class="cap">כל ריבוע הוא יום, מימין לשמאל · כהה יותר = יותר שאלות</div>
+      <div class="cal">${keys.map(k=>{const d=u.days[k];const lg=u.loginDays.includes(k)&&!(d&&d.q);return `<i class="${lg?'lg':''}" style="${d&&d.q?'background:'+seq(d.q):''}" title="${shortDate(k)}: ${d?`${d.q} שאלות, ${pct(d.c,d.q)}% הצלחה, ${mins(d.sec)} דק׳`:lg?'נכנס בלי לענות':'לא שיחק'}"></i>`}).join('')}</div>
+      <div class="legend"><span><i style="background:var(--grid)"></i>לא שיחק</span><span><i style="background:var(--seq2)"></i>עד 7</span><span><i style="background:var(--seq3)"></i>8–14</span><span><i style="background:var(--seq4)"></i>15–24</span><span><i style="background:var(--seq5)"></i>25+ שאלות</span><span><i style="outline:1.5px solid var(--s2);outline-offset:-1.5px"></i>נכנס בלי לענות</span></div></div>
+    <div class="card"><h2>רמה לפי נושא</h2><div class="cap">מהחלש לחזק · משמאל: רמה ואחוז הצלחה</div><div id="d-sk"></div></div>
+    <div class="card"><h2>סבבים אחרונים</h2><div class="sess">${ses.length?ses.map(s=>`<div><span>${shortDate(s.d)}</span><span style="flex:1">${KIND[s.kind]||s.kind}${s.done?'':' <span class="muted">(לא הושלם)</span>'}</span><span>${s.c}/${s.q} נכונות</span><span class="muted">${mins(s.sec)} דק׳</span></div>`).join(''):'<div class="muted">אין עדיין סבבים</div>'}</div></div>
+    <div class="card"><h2>פרטים</h2><div class="sess">
+      <div><span>הצטרפות</span><span>${shortDate(u.first)}</span></div>
+      <div><span>נראה לאחרונה</span><span>${u.lastSeen?u.lastSeen.toLocaleString('he-IL',{dateStyle:'short',timeStyle:'short'}):'—'}</span></div>
+      <div><span>מכשירים</span><span>${u.devices.map(d=>DEV[d]||d).join(', ')||'—'}</span></div>
+      <div><span>כוכבים</span><span>${fmt(u.stars)} · ${u.collection} פריטים באוסף</span></div>
+      <div><span>חשבון</span><span>${u.weakFacts} עובדות חשבון שעוד לא אוטומטיות</span></div>
+      <div><span>מזהה</span><span class="muted" style="font-size:.78rem">${esc(u.id)}</span></div></div></div>`;
+  hbars($('#d-sk'),skRows,4,r=>`${r.lvl.toFixed(1)} · ${r.acc}%`);
+  $('#d-x').onclick=closeUser;
+  $('#drawer').classList.add('open');$('#scrim').classList.add('open');$('#drawer').setAttribute('aria-hidden','false');
+}
+function closeUser(){$('#drawer').classList.remove('open');$('#scrim').classList.remove('open');$('#drawer').setAttribute('aria-hidden','true')}
+$('#scrim').onclick=closeUser;document.addEventListener('keydown',e=>{if(e.key==='Escape')closeUser()});
+
+function csv(){
+  const h=['uid','child','google_name','email','status','first','last_active','logins','active_days','streak','questions','correct','accuracy','avg_level','minutes','stars','missions','open_mistakes','fixed_mistakes','test_date','last_device',...Object.keys(SKILLS).map(k=>'lvl_'+k)];
+  const rows=USERS.map(u=>[u.id,u.child,u.gname,u.email,statusOf(u).k,u.first,u.last,u.logins,u.actDays.length,u.streak,u.q,u.c,u.acc,u.lvl&&u.lvl.toFixed(2),mins(u.sec),u.stars,u.missions,u.mistOpen,u.mistDone,u.testDate,u.lastDevice,...Object.keys(SKILLS).map(k=>u.skills[k].n?u.skills[k].lvl.toFixed(2):'')]);
+  const s='﻿'+[h,...rows].map(r=>r.map(v=>{v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download=`mesa-users-${TODAY}.csv`;a.click();
+}
+
+function loginScreen(msg){
+  $('#app').innerHTML=`<div class="login"><div style="font-size:3rem">🧠</div><h1 style="margin:.2em 0">לוח ניהול · מסע החשיבה</h1>
+    <div class="card"><p style="margin-top:0;color:var(--ink2)">הכניסה מיועדת למנהל בלבד. מתחברים עם חשבון Google שמוגדר כמנהל בכללי האבטחה.</p>
+    ${msg?`<p class="err">${msg}</p>`:''}
+    <button class="btn pri" id="g-in" ${API?'':'disabled'}>התחברות עם Google</button>
+    <p style="margin-bottom:0"><a href="?demo=1" style="color:var(--s1)">לצפייה בהדגמה עם נתונים בדויים</a></p></div></div>`;
+  const b=$('#g-in');if(b)b.onclick=()=>API.signIn().catch(e=>loginScreen('ההתחברות לא הצליחה: '+esc(e.code||e.message)));
+}
+async function load(){
+  try{
+    const docs=DEMO?demoDocs():await API.list();
+    USERS=docs.map(d=>toUser(d.id,d.data));
+    if(!$('#kpis'))shell();
+    draw();
+  }catch(e){
+    console.error(e);
+    if(/permission/i.test(e.code||e.message||''))loginScreen(`לחשבון ${esc(ME&&ME.email)} אין הרשאת מנהל. צריך לפרסם את <code>firestore.rules</code> המעודכן ב-Firebase, עם המייל הזה ברשימת המנהלים.`);
+    else $('#app').innerHTML=`<div class="banner err">טעינת הנתונים נכשלה: ${esc(e.message)}</div>`;
+  }
+}
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if($('#ch-act'))drawActivity()},150)});
+if(DEMO){ME=null;load()}
+window.__adminReady=api=>{API=api;if(DEMO)return;api.onUser(u=>{ME=u;if(u)load();else loginScreen('')})};
+window.__adminFail=e=>{if(!DEMO)loginScreen('אין חיבור ל-Firebase: '+esc(e&&e.message))};
+if(!DEMO&&!(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.apiKey))loginScreen('Firebase לא מוגדר בקובץ firebase-config.js');
+</script>
+<script type="module">
+const cfg=window.FIREBASE_CONFIG;
+if(cfg&&cfg.apiKey&&!/[?&]demo=1/.test(location.search)){
+  try{
+    const V='10.12.2',B=`https://www.gstatic.com/firebasejs/${V}/`;
+    const [{initializeApp},A,D]=await Promise.all([import(B+'firebase-app.js'),import(B+'firebase-auth.js'),import(B+'firebase-firestore.js')]);
+    const app=initializeApp(cfg,'admin'),auth=A.getAuth(app),db=D.getFirestore(app);
+    try{await A.getRedirectResult(auth)}catch(e){}
+    window.__adminReady({
+      onUser:fn=>A.onAuthStateChanged(auth,u=>fn(u?{uid:u.uid,email:u.email||'',photo:u.photoURL||''}:null)),
+      signIn:async()=>{const p=new A.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
+        try{await A.signInWithPopup(auth,p)}catch(e){if(/popup-blocked|operation-not-supported/.test(e.code||''))await A.signInWithRedirect(auth,p);else if(!/popup-closed|cancelled-popup/.test(e.code||''))throw e}},
+      signOut:()=>A.signOut(auth),
+      list:async()=>(await D.getDocs(D.collection(db,'users'))).docs.map(d=>({id:d.id,data:d.data()}))
+    });
+  }catch(e){console.error(e);window.__adminFail(e)}
+}
+</script>
+</body>
+</html>

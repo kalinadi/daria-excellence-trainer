@@ -302,6 +302,7 @@ window.__cloudReady=function(api){
       let local=loadLocal();
       if(!local||!(local.profile&&local.profile.name)){const anon=loadLocal(LS);if(anon&&anon.profile&&anon.profile.name)local=anon}
       let remote=null;try{remote=await api.load(u.uid)}catch(e){}
+      try{api.touch(u.uid,u,!remote)}catch(e){}
       state=(remote&&remote.json&&(remote.t||0)>((local&&local.t)||0))?migrate(JSON.parse(remote.json)):migrate(local);
       saveLocal();
       if(!remote||(remote.t||0)<(state.t||0)){state.t=state.t||Date.now();syncRemote()}
@@ -1283,14 +1284,21 @@ if(cfg&&cfg.apiKey){
     const [{initializeApp},A,D]=await Promise.all([import(B+'firebase-app.js'),import(B+'firebase-auth.js'),import(B+'firebase-firestore.js')]);
     const app=initializeApp(cfg),auth=A.getAuth(app),db=D.getFirestore(app);
     try{await A.getRedirectResult(auth)}catch(e){}
-    const toUser=u=>u?{uid:u.uid,name:u.displayName||'',email:u.email||''}:null;
+    const toUser=u=>u?{uid:u.uid,name:u.displayName||'',email:u.email||'',photo:u.photoURL||''}:null;
+    const dev=()=>{const a=navigator.userAgent;return /iPad|Tablet/i.test(a)||(/Macintosh/.test(a)&&navigator.maxTouchPoints>1)||(/Android/i.test(a)&&!/Mobile/i.test(a))?'tablet':/Mobi|iPhone|Android/i.test(a)?'phone':'desktop'};
+    const today=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
     window.__cloudReady({
       onUser:fn=>A.onAuthStateChanged(auth,u=>fn(toUser(u))),
       signIn:async()=>{const p=new A.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
         try{await A.signInWithPopup(auth,p)}catch(e){if(/popup-blocked|operation-not-supported|cancelled-popup/.test(e.code||''))await A.signInWithRedirect(auth,p);else if(!/popup-closed/.test(e.code||''))throw e}},
       signOut:()=>A.signOut(auth),
       load:async uid=>{const s=await D.getDoc(D.doc(db,'users',uid));return s.exists()?s.data():null},
-      save:(uid,data)=>D.setDoc(D.doc(db,'users',uid),data)
+      save:(uid,data)=>D.setDoc(D.doc(db,'users',uid),Object.assign({lastSeen:D.serverTimestamp()},data),{merge:true}),
+      // account info for the admin dashboard: who signed in, how often, from which device
+      touch:(uid,u,isNew)=>{const k='mesa-touch:'+uid+':'+today();let seen=false;try{seen=sessionStorage.getItem(k)==='1';sessionStorage.setItem(k,'1')}catch(e){}
+        const o={email:u.email,gname:u.name,photo:u.photo,lastLogin:D.serverTimestamp(),lastDevice:dev(),loginDays:D.arrayUnion(today()),devices:D.arrayUnion(dev())};
+        if(!seen)o.logins=D.increment(1);if(isNew)o.firstLogin=D.serverTimestamp();
+        return D.setDoc(D.doc(db,'users',uid),o,{merge:true}).catch(()=>{})}
     });
   }catch(e){console.error(e);window.__cloudFail&&window.__cloudFail(e)}
 }
