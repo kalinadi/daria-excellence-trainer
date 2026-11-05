@@ -302,10 +302,13 @@ window.__cloudReady=function(api){
       let local=loadLocal();
       if(!local||!(local.profile&&local.profile.name)){const anon=loadLocal(LS);if(anon&&anon.profile&&anon.profile.name)local=anon}
       let remote=null;try{remote=await api.load(u.uid)}catch(e){}
+      // one-time move from the previous Firebase project: progress waiting under migrate/{email}
+      let moved=null;if(!remote&&api.claim){try{moved=await api.claim(u.email)}catch(e){}if(moved&&moved.json)remote=moved}
       try{api.touch(u.uid,u,!remote)}catch(e){}
       state=(remote&&remote.json&&(remote.t||0)>((local&&local.t)||0))?migrate(JSON.parse(remote.json)):migrate(local);
       saveLocal();
-      if(!remote||(remote.t||0)<(state.t||0)){state.t=state.t||Date.now();syncRemote()}
+      if(moved&&moved.json){try{await api.finishClaim(u.uid,u.email,moved,state)}catch(e){}}
+      else if(!remote||(remote.t||0)<(state.t||0)){state.t=state.t||Date.now();syncRemote()}
       boot();
     }else{
       cloudUser=null;
@@ -1294,6 +1297,11 @@ if(cfg&&cfg.apiKey){
       signOut:()=>A.signOut(auth),
       load:async uid=>{const s=await D.getDoc(D.doc(db,'users',uid));return s.exists()?s.data():null},
       save:(uid,data)=>D.setDoc(D.doc(db,'users',uid),Object.assign({lastSeen:D.serverTimestamp()},data),{merge:true}),
+      claim:async email=>{if(!email)return null;const s=await D.getDoc(D.doc(db,'migrate',email.toLowerCase()));return s.exists()?s.data():null},
+      finishClaim:async(uid,email,m,st)=>{const o={json:JSON.stringify(st),t:st.t||Date.now(),lastSeen:D.serverTimestamp()};
+        for(const k of ['firstLogin','loginDays','devices'])if(m[k]!==undefined)o[k]=k==='firstLogin'?m[k]:D.arrayUnion(...m[k]);
+        if(typeof m.logins==='number')o.logins=D.increment(m.logins);
+        await D.setDoc(D.doc(db,'users',uid),o,{merge:true});await D.deleteDoc(D.doc(db,'migrate',email.toLowerCase()))},
       // account info for the admin dashboard: who signed in, how often, from which device
       touch:(uid,u,isNew)=>{const k='mesa-touch:'+uid+':'+today();let seen=false;try{seen=sessionStorage.getItem(k)==='1';sessionStorage.setItem(k,'1')}catch(e){}
         const o={email:u.email,gname:u.name,photo:u.photo,lastLogin:D.serverTimestamp(),lastDevice:dev(),loginDays:D.arrayUnion(today()),devices:D.arrayUnion(dev())};
