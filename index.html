@@ -187,6 +187,57 @@ th{font-weight:600;color:var(--muted);font-size:.9rem}
 .mtxt{line-height:1.5}
 .toast{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#fff;border-radius:999px;padding:10px 20px;font-family:var(--fd);font-weight:600;font-size:1.3rem;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:30;animation:pop .35s}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:40}
+/* ============ level map (v2) ============ */
+.daycard{display:flex;flex-direction:column;gap:10px;position:sticky;bottom:10px;z-index:6;box-shadow:0 8px 0 rgba(0,0,0,.08),0 -6px 30px rgba(0,0,0,.25)}
+.dayhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dayhead h2{font-size:1.5rem}
+.daysteps{display:flex;gap:6px;align-items:center}
+.daysteps i{flex:1;height:16px;border-radius:999px;background:var(--chip);border:2px solid var(--line);font-style:normal}
+.daysteps i.on{background:var(--accent);border-color:var(--accent-dk)}
+.daysteps i.now{border-color:var(--accent-dk);animation:pulse 1.6s infinite}
+.daysteps .cup{flex:none;font-size:1.9rem;line-height:1;filter:grayscale(1);opacity:.55}
+.daysteps .cup.won{filter:none;opacity:1;animation:bob 2.6s ease-in-out infinite}
+.map{display:flex;flex-direction:column;gap:0;padding-bottom:6px}
+.region{position:relative}
+.rbanner{position:relative;z-index:3;margin:-6px auto 0;background:rgba(255,255,255,.95);color:var(--ink);border-radius:999px;padding:8px 18px;font-family:var(--fd);font-weight:600;font-size:1.2rem;display:flex;gap:8px;align-items:center;width:max-content;max-width:92%;box-shadow:0 5px 0 rgba(0,0,0,.12)}
+.rbanner small{font-family:var(--fb);font-weight:400;color:var(--muted);font-size:.95rem}
+.rfield{position:relative;width:100%;max-width:520px;margin:0 auto}
+.rfield svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.deco{position:absolute;font-size:1.9rem;transform:translate(-50%,-50%);opacity:.9;pointer-events:none}
+.stn{position:absolute;transform:translate(-50%,-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:0;cursor:pointer;font-family:var(--fd);touch-action:manipulation}
+.stn .b{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:1.45rem;background:#fff;color:var(--ink);border:4px solid #fff;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.stn.done .b{background:var(--good);color:#fff;border-color:#bff0d2}
+.stn.cur .b{background:var(--accent);color:var(--btn-ink);border-color:#fff;width:76px;height:76px;font-size:1.7rem;animation:pulse 1.6s infinite}
+.stn.lock .b{background:rgba(255,255,255,.45);color:rgba(0,0,0,.35);border-color:rgba(255,255,255,.6);box-shadow:none}
+.stn.gate .b{width:84px;height:84px;font-size:2.6rem;border-radius:26px;background:#ffd54a;border-color:#fff3c4}
+.stn.gate.lock .b{background:#ffe9a0;border-color:rgba(255,255,255,.7);opacity:.85}
+.stn.gate.cur .b{width:92px;height:92px}
+.stn .ss{font-size:1.05rem;letter-spacing:1px;color:#ffd54a;text-shadow:0 2px 0 rgba(0,0,0,.35);min-height:1.2em}
+.stn .ss .e{color:rgba(255,255,255,.55)}
+.walker{position:absolute;z-index:4;transform:translate(-50%,calc(-100% - 34px));font-size:2.9rem;pointer-events:none;transition:left 1s ease-in-out,top 1s ease-in-out;filter:drop-shadow(0 4px 3px rgba(0,0,0,.3))}
+.walker span{display:block;animation:bob 2.6s ease-in-out infinite}
+.region.fog .rfield{filter:blur(2px) saturate(.4);opacity:.6}
+.fogtag{position:absolute;z-index:5;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.95);border-radius:20px;padding:12px 18px;font-family:var(--fd);font-weight:600;font-size:1.15rem;text-align:center;box-shadow:0 8px 20px rgba(0,0,0,.2);color:var(--ink)}
+.more{align-self:center}
+/* reward screens */
+.reward{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.bigstars{display:flex;gap:10px;justify-content:center;align-items:flex-end;direction:ltr}
+.bigstars span{font-size:clamp(4rem,16vw,5.6rem);line-height:1;color:#d9dbea;filter:drop-shadow(0 5px 0 rgba(0,0,0,.12))}
+.bigstars span:nth-child(2){font-size:clamp(5rem,20vw,7rem)}
+.bigstars span.on{color:#ffc12e;animation:starpop .55s cubic-bezier(.2,1.7,.4,1) both}
+@keyframes starpop{0%{transform:scale(0) rotate(-40deg)}100%{transform:none}}
+.rmsg{font-size:1.25rem;line-height:1.55;max-width:34ch}
+.trophy{font-size:clamp(6rem,26vw,9rem);line-height:1;animation:pop .7s cubic-bezier(.2,1.6,.4,1),bob 2.6s ease-in-out .7s infinite}
+.daystrip{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.daystrip div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.9rem;color:var(--muted)}
+.daystrip b{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--chip);font-size:1.2rem;border:3px solid var(--line)}
+.daystrip b.on{background:#ffefc2;border-color:#ffb300}
+.daystrip b.today{background:#ffb300;border-color:#c47f00;color:#fff;animation:pop .6s cubic-bezier(.2,1.6,.4,1) .5s both}
+.flame{font-family:var(--fd);font-weight:700;font-size:1.6rem;display:flex;gap:8px;align-items:center;justify-content:center}
+.flame span{font-size:2.4rem;animation:bob 1.8s ease-in-out infinite}
+.newland{font-size:6rem;line-height:1;animation:pop .7s cubic-bezier(.2,1.6,.4,1)}
+.surprise{font-size:4rem;background:none;border:0;cursor:pointer;animation:wiggle 1.2s infinite;line-height:1}
+.btncol{display:flex;flex-direction:column;gap:12px;width:100%}
 @media (max-width:560px){
   .opts.figs{grid-template-columns:repeat(2,minmax(0,1fr))}
   .opt.fig{max-height:150px}
@@ -254,10 +305,50 @@ const WORLDS={
   magic:{name:'ממלכת הקסם',e:'🏰',chars:['🧙‍♀️','🧙‍♂️','🧚','🐉'],items:['🔮','🪄','📜','💎','🍄','🏰','🌈','🧪','🦄','👑','🗝️','✨'],place:'טירה'},
   ocean:{name:'מתחת לים',e:'🐠',chars:['🐬','🐙','🐢','🧜‍♀️'],items:['🐠','🐡','🦀','🐚','🐳','🦑','🪸','🦈','🐋','🐙','🏝️','⚓'],place:'אי'}
 };
+/* ============ level map: one map per world ============ */
+const STATION_Q=7, GATE_Q=9, REGION=7;   // 6 stations + 1 gate per region
+const MAPS={
+  magic:{deco:['🌲','🍄','🌳','🌸','✨','🌿'],regions:[
+    {n:'יער הפטריות',e:'🍄',gate:'🚪',t:'ביער הזה גדלות פטריות זוהרות. מי יודע מה מסתתר מאחורי השער?'},
+    {n:'אגם הקסמים',e:'🌊',gate:'⛵',t:'מים כחולים ומנצנצים. אומרים שבאגם גרה ברבור שמדבר!'},
+    {n:'גבעת הפיות',e:'🧚',gate:'🌈',t:'הפיות מחכות למישהו שיפתור את החידות שלהן.'},
+    {n:'מערת הקריסטלים',e:'💎',gate:'🔮',t:'במערה נוצצים קריסטלים בכל הצבעים. צריך מוח חד כדי למצוא את הדרך.'},
+    {n:'גשר העננים',e:'☁️',gate:'🌉',t:'גשר שמרחף בין העננים. כל צעד מקרב אל הטירה.'},
+    {n:'הטירה הגדולה',e:'🏰',gate:'👑',t:'הטירה! כאן מתאמנים הקוסמים הכי טובים בממלכה.'}]},
+  space:{deco:['⭐','✨','🌑','☄️','🪐','🌟'],regions:[
+    {n:'הירח',e:'🌙',gate:'🚀',t:'נחיתה רכה על הירח. מכאן יוצאים למסע בין הכוכבים.'},
+    {n:'חגורת האסטרואידים',e:'☄️',gate:'🛰️',t:'סלעים עפים מכל הכיוונים. צריך לחשוב מהר!'},
+    {n:'מאדים האדום',e:'🔴',gate:'🛸',t:'כוכב אדום ומאובק. אולי נמצא כאן חייזר ידידותי?'},
+    {n:'טבעות שבתאי',e:'🪐',gate:'💫',t:'מחליקים על הטבעות של שבתאי.'},
+    {n:'ערפילית הצבעים',e:'🌌',gate:'🔭',t:'ענן ענק של צבעים בחלל. מה נגלה בתוכו?'},
+    {n:'הגלקסיה הרחוקה',e:'🌠',gate:'👽',t:'הכי רחוק שמישהו הגיע אי פעם!'}]},
+  animals:{deco:['🌳','🌿','🌾','🌻','🌴','🪨'],regions:[
+    {n:'הסוואנה',e:'🦁',gate:'🚙',t:'האריות מתחממים בשמש. הג׳יפ מחכה לנו!'},
+    {n:'הג׳ונגל',e:'🐒',gate:'🌉',t:'עצים ענקיים וקופים שקופצים מענף לענף.'},
+    {n:'הנהר הגדול',e:'🐊',gate:'🛶',t:'שטים בקאנו לאורך הנהר. זהירות, תנינים!'},
+    {n:'ההר המושלג',e:'🏔️',gate:'🧗',t:'למעלה על ההר גרים פנדות אדומות ונמרי שלג.'},
+    {n:'המדבר',e:'🐪',gate:'⛺',t:'גמלים, דיונות וכוכבים בלילה.'},
+    {n:'האי הירוק',e:'🦜',gate:'🏆',t:'אי מלא תוכים צבעוניים. כמעט סוף המסע!'}]},
+  ocean:{deco:['🫧','🪸','🐚','🌊','⭐','🌿'],regions:[
+    {n:'שונית האלמוגים',e:'🪸',gate:'🐚',t:'אלמוגים בכל הצבעים ודגים קטנים שמתחבאים בהם.'},
+    {n:'מערת הצדפות',e:'🦪',gate:'💎',t:'בכל צדפה מסתתרת פנינה. צריך לחשוב כדי לפתוח אותה.'},
+    {n:'יער האצות',e:'🌿',gate:'🐢',t:'אצות גבוהות שמתנדנדות. הצב יראה לנו את הדרך.'},
+    {n:'הספינה הטבועה',e:'🚢',gate:'🗝️',t:'ספינה ישנה על קרקעית הים. אולי יש בה אוצר?'},
+    {n:'המעמקים',e:'🐙',gate:'🔦',t:'חשוך כאן למטה, אבל הדגים זוהרים!'},
+    {n:'האי הנסתר',e:'🏝️',gate:'⚓',t:'אי שאף אחד לא מצא עד היום. כמעט הגענו!'}]}
+};
+function regionInfo(r){
+  const m=MAPS[state.profile.world]||MAPS.magic,L=m.regions.length,R=m.regions[r%L],lap=Math.floor(r/L);
+  return Object.assign({},R,{n:R.n+(lap?` ${lap+1}`:'')});
+}
+const isGate=idx=>idx%REGION===REGION-1;
+function dailyStations(){return clamp(Math.round(missionSize('daily')/STATION_Q),2,6)}
+function dayRec(k=dkey()){return state.days[k]=state.days[k]||{q:0,c:0,sec:0,missions:0}}
+function dayTarget(d){if(!d.tg)d.tg=dailyStations();return d.tg}
 function newState(){
   const skills={};Object.keys(SKILLS).forEach(k=>skills[k]={lvl:1.5,n:0,c:0,t:0,h:[]});
   return {v:2,profile:{name:'',gender:'',world:'',char:''},settings:{testDate:'',minutes:15,focus:'both',autoRead:false,sound:true,voice:'',rate:.9,nikud:true},
-    startDate:dkey(),skills,stars:0,collection:[],days:{},streak:{last:'',count:0},avgSec:42,seen:{},retry:{},sessions:[],subs:{},facts:{},mist:[],mistDone:0,t:0};
+    startDate:dkey(),skills,stars:0,collection:[],days:{},streak:{last:'',count:0},avgSec:42,seen:{},retry:{},sessions:[],subs:{},facts:{},mist:[],mistDone:0,map:{n:0,stars:[]},t:0};
 }
 function migrate(s){
   const base=newState();
@@ -275,6 +366,9 @@ function migrate(s){
   if(typeof s.stars!=='number')s.stars=0;
   if(!s.v||s.v<2){s.settings.autoRead=false;s.v=2}
   if(s.settings.nikud===undefined)s.settings.nikud=true;
+  // v2 level map. Players who already played start with the opening station done (a head start keeps motivation up).
+  if(!s.map||typeof s.map.n!=='number')s.map=(s.sessions.length?{n:1,stars:[3]}:{n:0,stars:[]});
+  if(!Array.isArray(s.map.stars))s.map.stars=[];
   return s;
 }
 const lsKey=()=>cloudUser?LS+':'+cloudUser.uid:LS;
@@ -368,7 +462,8 @@ function tone(fs,dur=.13,type='sine',gap=.09,vol=.16){
       o.connect(gn).connect(ac.destination);o.start(t);o.stop(t+dur+.05)})}catch(e){}
 }
 const sfx={ok:()=>tone([660,880,1175]),bad:()=>tone([294,220],.2,'triangle',.13,.12),tap:()=>tone([560],.05,'sine',0,.07),
-  win:()=>tone([523,659,784,1046,1318],.2,'triangle',.11),combo:()=>tone([880,1175,1568],.1,'square',.07,.06)};
+  win:()=>tone([523,659,784,1046,1318],.2,'triangle',.11),step:()=>tone([392,494,587],.08,'sine',.12,.08),star:n=>tone([[660],[784],[988]][n]||[988],.18,'triangle',0,.14),
+  fanfare:()=>{tone([523,523,523,698],.16,'triangle',.14,.14);setTimeout(()=>tone([659,784,1046,1318,1568],.22,'triangle',.12,.13),780)},combo:()=>tone([880,1175,1568],.1,'square',.07,.06)};
 let heVoice=null,heVoices=[],speaking=false,speakId=0;
 function voiceScore(v){let x=0;if(/enhanced|premium|natural|neural|online|siri|משופר/i.test(v.name))x+=6;if(/google|microsoft/i.test(v.name))x+=3;if(!v.localService)x+=1;return x}
 function loadVoices(){try{heVoices=speechSynthesis.getVoices().filter(v=>/^(he|iw)/i.test(v.lang));const pref=state&&state.settings.voice;
@@ -934,17 +1029,13 @@ function cheer(){
 }
 function renderHome(){
   document.body.dataset.world=state.profile.world;
-  const P=planInfo(),w=WORLDS[state.profile.world],day=state.days[P.today]||{q:0,c:0,sec:0,missions:0};
-  const doneToday=day.missions>0;const N=missionSize('daily');const lv=charLevel();
-  // journey path
-  let nodes=[];
-  for(let i=-3;i<=0;i++){const k=addDays(P.today,i);if(i<0&&daysBetween(state.startDate,k)<0)continue;const d=state.days[k];nodes.push({k,cls:i===0?(doneToday?'done':'today'):(d&&d.missions?'done':'missed'),lab:i===0?'היום':dowOf(k)})}
-  const ahead=P.daysLeft!==null?Math.min(Math.max(P.daysLeft-1,0),6):5;
-  for(let i=1;i<=ahead;i++){const k=addDays(P.today,i);nodes.push({k,cls:'',lab:dowOf(k)})}
-  const pathHtml=nodes.map(n=>`<div class="node ${n.cls}"><div class="dot">${n.cls==='done'?'✓':n.cls==='today'?'★':''}</div>${n.lab}</div>`).join('<div class="link"></div>')+
-    (P.daysLeft!==null&&P.daysLeft>=0?`<div class="link"></div><div class="node goal"><div class="dot">🏆</div>מבחן</div>`:'');
-  const daysTxt=P.daysLeft===null?'אין תאריך מבחן, מתאמנים כל יום':P.daysLeft>0?`עוד ${P.daysLeft} ימים למבחן`:P.daysLeft===0?'המבחן היום! בהצלחה!':'המבחן כבר עבר. אפשר להמשיך להתאמן';
+  const P=planInfo(),w=WORLDS[state.profile.world],day=dayRec(P.today),lv=charLevel();
+  const tg=dayTarget(day),st=day.st||0,dailyDone=day.missions>0;
+  const daysTxt=P.daysLeft===null?'':P.daysLeft>0?`עוד ${P.daysLeft} ימים למבחן`:P.daysLeft===0?'המבחן היום! בהצלחה!':'';
   const showExam=P.daysLeft!==null&&P.daysLeft<=21||state.skills.series.n>15;
+  const steps=Array.from({length:tg},(_,i)=>`<i class="${i<st?'on':i===st&&!dailyDone?'now':''}"></i>`).join('')+`<span class="cup ${dailyDone?'won':''}">🏆</span>`;
+  const left=Math.max(0,tg-st);
+  const nextIdx=state.map.n,nextGate=isGate(nextIdx);
   $('#s-home').innerHTML=`<div class="wrap">
     <div class="topbar">
       <div class="avatar">${state.profile.char}${lv>1?`<span class="badge">${lv}</span>`:''}</div>
@@ -952,49 +1043,115 @@ function renderHome(){
       <div class="pill" title="כוכבים">⭐ ${state.stars}</div>
       <div class="pill" title="ימים ברצף">🔥 ${state.streak.count}</div>
     </div>
-    <div class="card hero">
-      <div class="char">${state.profile.char}</div>
-      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
-        <div class="bubble">${esc(cheer())}</div>
-        ${doneToday?`<h2 class="mission-title">המשימה של היום הושלמה! ✓</h2>
-          <div class="meta"><span class="tag">${day.c} מתוך ${day.q} נכונות</span><span class="tag">${Math.round(day.sec/60)} דקות</span></div>
-          <button class="btn big" id="go-bonus">סיבוב בונוס ✨</button>`
-        :`<h2 class="mission-title">המשימה של היום</h2>
-          <div class="meta"><span class="tag">${N} שאלות</span><span class="tag">בערך ${state.settings.minutes} דקות</span><span class="tag">${w.name}</span></div>
-          <button class="btn big" id="go">יוצאים לדרך! 🚀</button>`}
-      </div>
+    ${daysTxt?`<div class="onbg" style="text-align:center;font-family:var(--fd);font-size:1.15rem">${daysTxt}</div>`:''}
+    <div class="map" id="map">${mapHTML()}</div>
+    <div class="card daycard">
+      <div class="dayhead"><h2>${dailyDone?'התרגול של היום הושלם! 🎉':'התרגול של היום'}</h2><div class="spacer"></div><span class="muted">${dailyDone?'כל תחנה נוספת = עוד כוכבים':left===1?'עוד תחנה אחת לגביע!':`עוד ${left} תחנות לגביע`}</span></div>
+      <div class="daysteps" aria-label="${Math.min(st,tg)} מתוך ${tg} תחנות היום">${steps}</div>
+      <button class="btn big" id="go">${nextGate?'לשער! 🚪':`לתחנה ${nextIdx+1} ${dailyDone?'✨':'🚀'}`}</button>
     </div>
-    <div class="card"><div class="row" style="justify-content:space-between"><h3>המסע שלי</h3><span class="muted">${daysTxt}</span></div><div class="path">${pathHtml}</div></div>
     <div class="grid2">
-      ${showExam?`<button class="tile" id="go-exam"><span class="e">⏱️</span>אתגר מבחן<small>12 שאלות עם שעון</small></button>`:`<button class="tile" id="go-bonus2"><span class="e">✨</span>סיבוב קצר<small>עוד כמה שאלות</small></button>`}
-      <button class="tile" id="go-coll"><span class="e">${w.items[0]}</span>האוסף שלי<small>${state.collection.filter(x=>w.items.includes(x)).length} מתוך ${w.items.length}</small></button>
+      ${showExam?`<button class="tile" id="go-exam"><span class="e">⏱️</span>אתגר מבחן<small>12 שאלות עם שעון</small></button>`:''}
+      <button class="tile" id="go-coll" ${showExam?'':'style="grid-column:1/-1"'}><span class="e">${w.items[0]}</span>האוסף שלי<small>${state.collection.filter(x=>w.items.includes(x)).length} מתוך ${w.items.length}</small></button>
     </div>
     <div class="card"><h3 style="margin-bottom:12px">הכוחות שלי</h3><div class="skills">${Object.entries(SKILLS).filter(([k])=>focusWeight(k)>=1).map(([k,s])=>{const L=Math.floor(state.skills[k].lvl);return `<div class="sk"><b>${s.e} ${s.name}</b><div class="lv">${[1,2,3,4,5].map(i=>`<i class="${i<=L?'on':''}"></i>`).join('')}</div></div>`}).join('')}</div></div>
     <div class="row" style="justify-content:center"><button class="btn ghost" id="go-parent">אזור הורים 🔒</button></div>
   </div>`;
   show('home');
   const on=(id,fn)=>{const el=$('#'+id);if(el)el.onclick=fn};
-  on('go',()=>startMission('daily'));on('go-bonus',()=>startMission('bonus'));on('go-bonus2',()=>startMission(doneToday?'bonus':'daily'));
+  on('go',()=>startStation(state.map.n));
   on('go-exam',()=>startMission('exam'));on('go-coll',renderColl);on('go-parent',renderGate);
+  on('more-past',()=>{mapShowAll=true;$('#map').innerHTML=mapHTML();bindMap(false)});
+  bindMap(true);
+}
+
+/* ============ map rendering ============ */
+const ROWH=96, XS=[50,76,66,34,22,40,50];   // x% of each station inside a region (bottom → top)
+let walkFrom=null, mapShowAll=false;
+function stnPos(i){return {x:XS[i],y:(REGION-1-i)*ROWH+ROWH/2+56}}   // y in px from top of region field
+function mapHTML(){
+  const n=state.map.n,cur=Math.floor(n/REGION);
+  const first=mapShowAll?0:Math.max(0,cur-1);
+  let out='';
+  for(let r=cur+1;r>=first;r--)out+=regionHTML(r,r===cur+1);
+  if(first>0)out+=`<button class="btn ghost more" id="more-past">הצגת ${first} אזורים קודמים</button>`;
+  return out;
+}
+function regionHTML(r,fog){
+  const R=regionInfo(r),m=MAPS[state.profile.world]||MAPS.magic,n=state.map.n;
+  const H=REGION*ROWH+56;
+  const pts=Array.from({length:REGION},(_,i)=>stnPos(i));
+  // path: enters from the bottom edge, leaves through the top edge
+  const seg=(a,b)=>`M${a.x} ${a.y} C${a.x} ${(a.y+b.y)/2} ${b.x} ${(a.y+b.y)/2} ${b.x} ${b.y}`;
+  const all=[{x:50,y:H},...pts,{x:50,y:0}];
+  let paths='';
+  for(let k=0;k<all.length-1;k++){
+    const done=r*REGION+k<=n;            // segment k leads into station r*REGION+k (the last one leads to the next region)
+    const d=seg(all[k],all[k+1]);
+    paths+=`<path d="${d}" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="22" stroke-linecap="round" vector-effect="non-scaling-stroke" transform="translate(0 4)"/>`+
+      `<path d="${d}" fill="none" stroke="${done?'#fff':'rgba(255,255,255,.45)'}" stroke-width="18" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`+
+      (done?'':`<path d="${d}" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="4" stroke-dasharray="2 14" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+  }
+  // decorations: deterministic per region
+  let deco='';const sd=r*7+3;
+  for(let k=0;k<6;k++){const i=k%REGION,side=(k+r)%2?1:-1,p=stnPos(i);const x=clamp(p.x+side*(28+((sd*(k+1))%14)),6,94);deco+=`<span class="deco" style="left:${x}%;top:${p.y-30+((sd*k)%40)}px">${m.deco[(sd+k)%m.deco.length]}</span>`}
+  const stns=pts.map((p,i)=>{
+    const idx=r*REGION+i,gate=isGate(idx),s=state.map.stars[idx]||0;
+    const cls=idx<n?'done':idx===n?'cur':'lock';
+    const label=gate?R.gate:idx<n?(idx+1):idx===n?(idx+1):'🔒';
+    const ss=idx<n?[1,2,3].map(j=>j<=s?'★':'<span class="e">★</span>').join(''):'';
+    return `<button class="stn ${cls} ${gate?'gate':''}" data-idx="${idx}" style="left:${p.x}%;top:${p.y}px" aria-label="${gate?'שער':'תחנה '+(idx+1)}"><span class="b">${label}</span><span class="ss">${ss}</span></button>`;
+  }).join('');
+  const done=Math.max(0,Math.min(REGION,n-r*REGION));
+  return `<div class="region ${fog?'fog':''}" data-r="${r}">
+    <div class="rfield" style="height:${H}px"><svg viewBox="0 0 100 ${H}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${deco}${stns}
+      ${fog?'':`<div class="walker" id="walker-${r}" hidden><span>${state.profile.char}</span></div>`}</div>
+    <div class="rbanner">${R.e} ${esc(R.n)} <small>${done}/${REGION}</small></div>
+    ${fog?`<div class="fogtag">🌫️ ${esc(R.n)}<br><small class="muted">נפתח אחרי ${esc(regionInfo(r-1).gate)} השער</small></div>`:''}
+  </div>`;
+}
+function bindMap(scroll){
+  document.querySelectorAll('#map .stn').forEach(b=>b.onclick=()=>{
+    const idx=+b.dataset.idx,n=state.map.n;
+    if(idx===n)return startStation(idx);
+    if(idx>n){sfx.tap();return toast('🔒 קודם מסיימים את התחנה הקודמת')}
+    const s=state.map.stars[idx]||0;sfx.tap();
+    openSheet('',`<h3>${isGate(idx)?'השער':'תחנה '+(idx+1)} ${'★'.repeat(s)}${'☆'.repeat(3-s)}</h3>
+      <div class="explain">${s<3?'רוצה לנסות שוב ולאסוף 3 כוכבים?':'כבר יש כאן 3 כוכבים! אפשר לשחק שוב בשביל האימון.'}</div>
+      <div class="row"><button class="btn" id="rp-go">משחקים שוב</button><button class="btn ghost" id="rp-no">לא עכשיו</button></div>`);
+    $('#rp-go').onclick=()=>startStation(idx);$('#rp-no').onclick=closeSheet;
+  });
+  // the character stands on the current station; after a new station it walks there
+  const n=state.map.n,r=Math.floor(n/REGION),wk=$('#walker-'+r);
+  if(wk){
+    const to=stnPos(n%REGION);
+    const fromIdx=walkFrom!==null&&walkFrom<n&&Math.floor(walkFrom/REGION)===r?walkFrom:null;
+    const from=fromIdx!==null?stnPos(fromIdx%REGION):to;
+    wk.style.transition='none';wk.style.left=from.x+'%';wk.style.top=from.y+'px';wk.hidden=false;
+    if(fromIdx!==null){wk.offsetWidth;wk.style.transition='';setTimeout(()=>{wk.style.left=to.x+'%';wk.style.top=to.y+'px';sfx.step()},350)}
+  }
+  walkFrom=null;
+  if(scroll){const c=document.querySelector('#map .stn.cur');if(c)setTimeout(()=>{const R=c.getBoundingClientRect();if(R.top<80||R.bottom>innerHeight-40)c.scrollIntoView({block:'center',behavior:'smooth'})},120)}
 }
 
 /* ============ play ============ */
 let M=null;
-function startMission(kind){
+function startMission(kind,opt={}){
   sfx.tap();
-  M={kind,total:missionSize(kind),i:0,correct:0,stars:0,combo:0,recent:[],t0:Date.now(),sec:0,q:null,qStart:0,locked:false,timer:null,redo:[],served:[],reviews:0};
+  M={kind,total:opt.total||missionSize(kind),i:0,correct:0,stars:0,combo:0,recent:[],t0:Date.now(),sec:0,q:null,qStart:0,locked:false,timer:null,redo:[],served:[],reviews:0};
+  Object.assign(M,opt);
   nextQ();
 }
 function nextQ(){
   clearInterval(M.timer);closeSheet();
   const overTime=M.kind==='daily'&&(Date.now()-M.t0)/1000>state.settings.minutes*60*1.3&&M.i>=5;
-  if(M.i>=M.total||overTime)return finishMission();
+  if(M.i>=M.total||overTime)return (M.kind==='station'||M.kind==='gate')?finishStation():finishMission();
   let q=null;
   if(M.kind!=='exam'){
     const r=M.redo.findIndex(x=>x.at<=M.i);
     if(r>=0){const e=state.mist.find(m=>m.id===M.redo[r].id);M.redo.splice(r,1);if(e){q=unpackQ(e.q);q.review='redo';q.mistId=e.id}}
-    if(!q&&M.kind==='daily'&&M.i<2&&focusWeight('facts')>=1){q=makeQ('facts',false);q.warm=true}
-    const cap=M.kind==='daily'?3:2;
+    if(!q&&(M.kind==='daily'||M.warmup)&&M.i<2&&focusWeight('facts')>=1){q=makeQ('facts',false);q.warm=true}
+    const cap=M.kind==='daily'?3:(M.kind==='station'||M.kind==='gate')?1:2;
     if(!q&&M.i>=2&&M.reviews<cap&&Math.random()<.35){const d=dueMistakes();if(d.length){const e=d.sort((a,b)=>a.due<b.due?-1:1)[0];q=unpackQ(e.q);q.review='book';q.mistId=e.id;M.reviews++}}
   }
   if(!q){const k=chooseSkill(M.recent);q=makeQ(k,M.i<3&&M.kind!=='exam')}
@@ -1007,7 +1164,7 @@ function speakQ(){const q=M.q;let t=q.promptAfter?`${q.speak||''} ${q.prompt}`:(
 function renderPlay(){
   const q=M.q,sk=SKILLS[q.skill];
   $('#s-play').innerHTML=`<div class="wrap">
-    <div class="playbar"><button class="ibtn" id="quit" aria-label="יציאה">✕</button><div class="prog"><i style="width:${(M.i/M.total*100).toFixed(1)}%"></i></div><div class="pill">⭐ ${state.stars}</div></div>
+    <div class="playbar"><button class="ibtn" id="quit" aria-label="יציאה">✕</button>${M.station!==undefined?`<div class="pill">${M.kind==='gate'?regionInfo(Math.floor(M.station/REGION)).gate+' שער':'📍 '+(M.station+1)}</div>`:''}<div class="prog"><i style="width:${(M.i/M.total*100).toFixed(1)}%"></i></div><div class="pill">⭐ ${state.stars}</div></div>
     <div class="card qcard">
       ${M.kind==='exam'?'<div class="timer"><i id="tbar"></i></div>':''}
       <div class="qhead"><span class="sktag">${sk.e} ${sk.name}</span><span class="stars-lv" aria-label="רמה ${q.level}">${'★'.repeat(q.level)}</span><div class="spacer"></div>
@@ -1056,7 +1213,7 @@ function answer(i){
   else{M.combo=0;sfx.bad()}
   save();
   document.querySelector('.prog>i').style.width=(M.i/M.total*100).toFixed(1)+'%';
-  const praise=pick(['מעולה!','כל הכבוד!','יפה מאוד!',g('אלוף!','אלופה!'),'בדיוק!','וואו!',g('חכם!','חכמה!'),'נכון!']);
+  const praise=q.review&&ok?pick([`${g('ניסית','ניסית')} שוב והצלחת!`,'הפעם זה עבד!',`${g('למדת','למדת')} מהטעות!`]):pick(['מעולה!','כל הכבוד!','יפה מאוד!','בדיוק!','וואו!','נכון!','מצאת את החוקיות!',`${g('חשבת','חשבת')} טוב!`,`${g('בדקת','בדקת')} היטב!`]);
   const timeout=i===-1;
   openSheet(ok?'good':'bad',`<h3>${ok?praise:timeout?'נגמר הזמן':'כמעט!'}</h3>
     ${ok?(q.level>=4?`<div class="explain">${esc(q.explain)}</div>`:''):`<div class="explain">${esc(q.explain)}</div>`}
@@ -1068,7 +1225,7 @@ function answer(i){
 }
 function askQuit(){
   stopSpeak();
-  openSheet('',`<h3>לצאת מהמשימה?</h3><div class="explain">הכוכבים וההתקדמות נשמרו.</div>
+  openSheet('',`<h3>${M.station!==undefined?'לצאת מהתחנה?':'לצאת מהמשימה?'}</h3><div class="explain">${M.station!==undefined?`הכוכבים נשמרו. התחנה תחכה לך במפה, ${M.total-M.i===1?'נשארה רק שאלה אחת!':`נשארו רק ${M.total-M.i} שאלות.`}`:'הכוכבים וההתקדמות נשמרו.'}</div>
     <div class="row"><button class="btn" id="q-stay">ממשיכים לשחק</button><button class="btn ghost" id="q-go">יציאה</button></div>`);
   $('#q-stay').onclick=closeSheet;$('#q-go').onclick=()=>{clearInterval(M.timer);clearTimeout(M.auto);logSession(false);M=null;renderHome()};
 }
@@ -1105,6 +1262,98 @@ function finishMission(){
     else{state.stars+=10;html=`<div class="prize">⭐</div><div style="font-family:var(--fd);font-size:1.4rem;font-weight:600">האוסף מלא! קיבלת 10 כוכבים</div>`}
     save();sfx.win();confetti(90);$('#chestbox').innerHTML=html;
   };
+}
+
+/* ============ stations + rewards (v2) ============ */
+function startStation(idx){
+  closeSheet();
+  const gate=isGate(idx),day=dayRec();dayTarget(day);
+  startMission(gate?'gate':'station',{station:idx,replay:idx<state.map.n,total:gate?GATE_Q:STATION_Q,warmup:!(day.st>0)&&!gate});
+}
+function starsFor(c,t){const p=c/Math.max(1,t);return p>=.85?3:p>=.55?2:1}
+function finishStation(){
+  clearTimeout(M.auto);clearInterval(M.timer);
+  const idx=M.station,gate=M.kind==='gate',today=dkey(),d=dayRec(today),tg=dayTarget(d);
+  const earned=starsFor(M.correct,M.i),prev=state.map.stars[idx]||0,isNew=idx===state.map.n;
+  state.map.stars[idx]=Math.max(prev,earned);
+  if(isNew)state.map.n++;
+  const wasDone=d.missions>0;
+  d.st=(d.st||0)+1;
+  let dailyNow=false;
+  if(!wasDone&&d.st>=tg){
+    const y=addDays(today,-1);
+    state.streak.count=state.streak.last===y?state.streak.count+1:(state.streak.last===today?state.streak.count:1);
+    state.streak.last=today;d.missions=1;dailyNow=true;
+  }
+  logSession(true);
+  const q=[()=>screenStation(idx,earned,prev,isNew,gate)];
+  if(gate&&isNew)q.push(()=>screenGate(idx));
+  if(dailyNow)q.push(()=>screenDaily(d));
+  walkFrom=isNew?idx:null;
+  const prevM=M;M=null;
+  runRewards(q,prevM);
+}
+let RQ=[];
+function runRewards(q){RQ=q.slice();nextReward()}
+function nextReward(){const f=RQ.shift();if(f)f();else renderHome()}
+function rewardShell(inner,btns){
+  $('#s-done').innerHTML=`<div class="wrap" style="align-items:stretch"><div class="card reward">${inner}<div class="btncol">${btns}</div></div></div>`;
+  show('done');
+}
+function giveItem(){
+  const w=WORLDS[state.profile.world],left=w.items.filter(x=>!state.collection.includes(x));
+  if(left.length){const it=pick(left);state.collection.push(it);save();return `<div class="prize">${it}</div><div style="font-family:var(--fd);font-size:1.4rem;font-weight:600">פריט חדש לאוסף! (${w.items.filter(x=>state.collection.includes(x)).length}/${w.items.length})</div>`}
+  state.stars+=10;save();return `<div class="prize">⭐</div><div style="font-family:var(--fd);font-size:1.4rem;font-weight:600">האוסף מלא! ${g('קיבלת','קיבלת')} 10 כוכבים</div>`;
+}
+function chestHTML(id){return `<div id="${id}"><button class="chest" id="${id}-btn" aria-label="פתיחת התיבה">🎁</button><div class="muted" style="font-size:1.2rem">לחצו על התיבה!</div></div>`}
+function bindChest(id){const b=$('#'+id+'-btn');if(b)b.onclick=()=>{sfx.win();confetti(90);$('#'+id).innerHTML=giveItem()}}
+function screenStation(idx,earned,prev,isNew,gate){
+  const last=state.sessions[state.sessions.length-1]||{q:0,c:0};
+  const msg=earned===3?pick([`פתרת כמעט הכול נכון. עבודה מדויקת!`,`${g('בדקת','בדקת')} כל שאלה עד הסוף, וזה השתלם!`,`חשיבה חדה! שלושה כוכבים.`])
+    :earned===2?pick([`עבודה טובה! עוד קצת דיוק ו${g('תגיע','תגיעי')} לשלושה כוכבים.`,`${g('התאמצת','התאמצת')} יפה. בפעם הבאה ${g('נסה','נסי')} לבדוק כל תשובה לפני שלוחצים.`])
+    :pick([`היו כאן שאלות קשות, ${g('ונשארת','ונשארת')} עד הסוף. ככה המוח מתחזק!`,`${g('סיימת','סיימת')} את התחנה! אפשר לחזור אליה אחר כך ולאסוף עוד כוכבים.`]);
+  const better=!isNew&&earned>prev?`<div class="tag" style="font-size:1.1rem">⬆️ ${g('שיפרת','שיפרת')} את התחנה מ-${prev} ל-${earned} כוכבים!</div>`:'';
+  const surprise=isNew&&!gate&&Math.random()<.3;
+  const title=gate?'עברת את השער!':`תחנה ${idx+1} הושלמה!`;
+  rewardShell(`<h1 style="font-size:2.2rem">${title}</h1>
+    <div class="bigstars">${[1,2,3].map(j=>`<span class="${j<=earned?'on':''}" style="animation-delay:${.25+j*.35}s">★</span>`).join('')}</div>
+    <div class="rmsg">${msg}</div>${better}
+    <div class="stats" style="width:100%"><div class="stat"><b>${last.c}/${last.q}</b>נכונות</div><div class="stat"><b>${earned}★</b>בתחנה</div><div class="stat"><b>⭐ ${state.stars}</b>כוכבים</div></div>
+    ${surprise?`<div id="sp"><button class="surprise" id="sp-btn" aria-label="הפתעה">🎁</button><div class="muted">הפתעה! לחצו</div></div>`:''}`,
+    `<button class="btn big" id="rw-next">${RQ.length?'המשך ←':'חזרה למפה 🗺️'}</button>`);
+  [1,2,3].forEach(j=>{if(j<=earned)setTimeout(()=>{sfx.star(j-1);if(j===earned)confetti(earned*30)},250+j*350)});
+  const sp=$('#sp-btn');if(sp)sp.onclick=()=>{const k=rnd(3,6);state.stars+=k;save();sfx.win();confetti(60);$('#sp').innerHTML=`<div class="prize">⭐</div><div style="font-family:var(--fd);font-size:1.3rem;font-weight:600">+${k} כוכבים בונוס!</div>`};
+  $('#rw-next').onclick=()=>{sfx.tap();nextReward()};
+}
+function screenGate(idx){
+  const r=Math.floor(idx/REGION),done=regionInfo(r),nx=regionInfo(r+1);
+  rewardShell(`<h1 style="font-size:2.1rem">${esc(done.n)}: הושלם! ${done.gate}</h1>
+    <div class="rmsg">${g('פתחת','פתחת')} את השער. בתיבה מחכה לך משהו:</div>
+    ${chestHTML('gc')}
+    <div style="height:6px"></div>
+    <div class="newland">${nx.e}</div>
+    <h2>נפתח אזור חדש: ${esc(nx.n)}</h2>
+    <div class="rmsg">${esc(nx.t)}</div>`,
+    `<button class="btn big" id="rw-next">${RQ.length?'המשך ←':'יוצאים לאזור החדש 🗺️'}</button>`);
+  sfx.fanfare();confetti(120);bindChest('gc');
+  $('#rw-next').onclick=()=>{sfx.tap();nextReward()};
+}
+function screenDaily(d){
+  const today=dkey(),n=state.profile.name;
+  let strip='';for(let i=-6;i<=0;i++){const k=addDays(today,i),x=state.days[k];strip+=`<div><b class="${i===0?'today':x&&x.missions?'on':''}">${i===0||x&&x.missions?'✓':''}</b>${i===0?'היום':dowOf(k)}</div>`}
+  const mins=Math.max(1,Math.round(d.sec/60));
+  rewardShell(`<div class="trophy">🏆</div>
+    <h1 style="font-size:2.3rem">התרגול של היום הושלם!</h1>
+    <div class="rmsg">${esc(n)}, ${g('התאמנת','התאמנת')} ${mins} דקות ו${g('פתרת','פתרת')} נכון ${d.c} שאלות. ככה מתכוננים למבחן!</div>
+    <div class="flame"><span>🔥</span>${state.streak.count===1?'יום ראשון ברצף!':`${state.streak.count} ימים ברצף!`}</div>
+    <div class="daystrip">${strip}</div>
+    <div class="rmsg" style="font-weight:600">פרס היום:</div>
+    ${chestHTML('dc')}`,
+    `<button class="btn big" id="rw-more">ממשיכים במסע 🗺️</button><button class="btn ghost big" id="rw-bye">סיימתי להיום 👋</button>`);
+  sfx.fanfare();confetti(140);setTimeout(()=>confetti(100),900);setTimeout(()=>confetti(100),1800);
+  bindChest('dc');
+  $('#rw-more').onclick=()=>{sfx.tap();nextReward()};
+  $('#rw-bye').onclick=()=>{sfx.tap();RQ=[];renderHome();toast(`נתראה מחר, ${n}! 👋`)};
 }
 
 /* ============ sheet ============ */
